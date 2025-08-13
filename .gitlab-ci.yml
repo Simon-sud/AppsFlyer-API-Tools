@@ -6,8 +6,12 @@ build:
   stage: build
   image: node:18
   script:
+    - pwd
+    - ls -la
     - cd frontend
-    - npm ci
+    - pwd
+    - ls -la
+    - cat package.json | grep -A 5 -B 5 "scripts"
     - npm run build
   artifacts:
     paths:

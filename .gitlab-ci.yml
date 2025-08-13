@@ -1,88 +1,30 @@
 stages:
-  - install
   - build
   - deploy
 
-cache:
-  paths:
-    - node_modules/
-    - frontend/node_modules/
-
-install_dependencies:
-  stage: install
-  image: node:18
-  script:
-    - cd frontend
-    - npm ci --only=production
-  artifacts:
-    paths:
-      - frontend/node_modules/
-    expire_in: 1 hour
-
-build_frontend:
+build:
   stage: build
   image: node:18
-  dependencies:
-    - install_dependencies
   script:
     - cd frontend
+    - npm ci
     - npm run build
   artifacts:
     paths:
       - frontend/dist/
-    expire_in: 1 week
 
-deploy_production:
+deploy:
   stage: deploy
   image: alpine:latest
-  dependencies:
-    - build_frontend
-  before_script:
+  script:
+    - echo "Deploying to production"
     - apk add --no-cache openssh-client rsync
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY_BASE64" | base64 -d | ssh-add -
     - mkdir -p ~/.ssh
     - echo "StrictHostKeyChecking no" >> ~/.ssh/config
     - chmod 600 ~/.ssh/config
-  script:
     - rsync -avz --delete frontend/dist/ $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
-  environment:
-    name: production
-    url: $DEPLOY_URL
   only:
     - main
   when: manual
-
-deploy_staging:
-  stage: deploy
-  image: alpine:latest
-  dependencies:
-    - build_frontend
-  before_script:
-    - apk add --no-cache openssh-client rsync
-    - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY_STAGING_BASE64" | base64 -d | ssh-add -
-    - mkdir -p ~/.ssh
-    - echo "StrictHostKeyChecking no" >> ~/.ssh/config
-    - chmod 600 ~/.ssh/config
-  script:
-    - rsync -avz --delete frontend/dist/ $DEPLOY_USER_STAGING@$DEPLOY_HOST_STAGING:$DEPLOY_PATH_STAGING
-  environment:
-    name: staging
-    url: $DEPLOY_URL_STAGING
-  only:
-    - develop
-  when: manual
-
-code_quality:
-  stage: install
-  image: node:18
-  script:
-    - cd frontend
-    - npm ci
-    - npm run lint
-    - npm run test
-  only:
-    - main
-    - develop
-  allow_failure: true

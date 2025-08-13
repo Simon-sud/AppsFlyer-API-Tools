@@ -1,18 +1,13 @@
-# GitLab CI/CD 配置文件
-# 用于自动化构建和部署前端项目
-
 stages:
   - install
   - build
   - deploy
 
-# 缓存配置
 cache:
   paths:
     - node_modules/
     - frontend/node_modules/
 
-# 安装依赖阶段
 install_dependencies:
   stage: install
   image: node:18
@@ -23,11 +18,7 @@ install_dependencies:
     paths:
       - frontend/node_modules/
     expire_in: 1 hour
-  only:
-    - main
-    - develop
 
-# 构建阶段
 build_frontend:
   stage: build
   image: node:18
@@ -40,11 +31,7 @@ build_frontend:
     paths:
       - frontend/dist/
     expire_in: 1 week
-  only:
-    - main
-    - develop
 
-# 部署到生产环境 (main分支)
 deploy_production:
   stage: deploy
   image: alpine:latest
@@ -59,7 +46,6 @@ deploy_production:
     - chmod 600 ~/.ssh/config
   script:
     - rsync -avz --delete frontend/dist/ $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
-    - echo "部署完成: $(date)"
   environment:
     name: production
     url: $DEPLOY_URL
@@ -67,7 +53,6 @@ deploy_production:
     - main
   when: manual
 
-# 部署到测试环境 (develop分支)
 deploy_staging:
   stage: deploy
   image: alpine:latest
@@ -82,7 +67,6 @@ deploy_staging:
     - chmod 600 ~/.ssh/config
   script:
     - rsync -avz --delete frontend/dist/ $DEPLOY_USER_STAGING@$DEPLOY_HOST_STAGING:$DEPLOY_PATH_STAGING
-    - echo "测试环境部署完成: $(date)"
   environment:
     name: staging
     url: $DEPLOY_URL_STAGING
@@ -90,7 +74,6 @@ deploy_staging:
     - develop
   when: manual
 
-# 代码质量检查
 code_quality:
   stage: install
   image: node:18

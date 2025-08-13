@@ -15,7 +15,7 @@ cache:
 # 安装依赖阶段
 install_dependencies:
   stage: install
-  image: node:18-alpine
+  image: node:18
   script:
     - cd frontend
     - npm ci --only=production
@@ -30,7 +30,7 @@ install_dependencies:
 # 构建阶段
 build_frontend:
   stage: build
-  image: node:18-alpine
+  image: node:18
   dependencies:
     - install_dependencies
   script:
@@ -93,7 +93,7 @@ deploy_staging:
 # 代码质量检查
 code_quality:
   stage: install
-  image: node:18-alpine
+  image: node:18
   script:
     - cd frontend
     - npm ci

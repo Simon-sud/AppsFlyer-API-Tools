@@ -1,0 +1,6 @@
+.validate-refresh-btn {
+  transition: transform 0.2s;
+}
+.validate-refresh-btn:hover {
+  transform: scale(1.2);
+} 

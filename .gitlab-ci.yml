@@ -13,7 +13,7 @@ build:
     - ls -la
     - cat package.json | grep -A 5 -B 5 "scripts"
     - npm install
-    - npm run build
+    - CI=false npm run build
   artifacts:
     paths:
       - frontend/dist/

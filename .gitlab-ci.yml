@@ -12,6 +12,7 @@ build:
     - pwd
     - ls -la
     - cat package.json | grep -A 5 -B 5 "scripts"
+    - npm install
     - npm run build
   artifacts:
     paths:

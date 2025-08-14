@@ -1569,92 +1569,15 @@ const Account: React.FC = () => {
           onFinish={handleAddEdit}
           autoComplete="new-password"
         >
-          {/* 合并的输入框组件 */}
+          {/* 使用CSS Grid布局的输入框组件 */}
           <div style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
+            display: 'grid', 
+            gridTemplateColumns: '1fr',
             gap: '16px', 
             marginBottom: '24px',
             width: '100%'
           }}>
-            {/* Account Name输入框 */}
-          <Form.Item
-            name="account_name"
-              rules={[{ required: true, message: '' }]}
-              style={{ marginBottom: 0, width: '100%' }}
-              validateStatus={form.getFieldError('account_name').length > 0 ? 'error' : ''}
-            >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 12px',
-                border: form.getFieldError('account_name').length > 0 ? '1px solid #ff4d4f' : '1px solid #d9d9d9',
-                borderRadius: '4px',
-                background: '#fff',
-                cursor: 'text',
-                fontSize: '13px',
-                fontFamily: '"Museo Sans", sans-serif',
-                fontWeight: 300,
-                color: 'rgb(34, 13, 78)',
-                width: '100%',
-                transition: 'all 0.2s ease',
-                opacity: editingConfig?.is_default ? 0.5 : 1
-              }}
-              onMouseEnter={(e) => {
-                if (!editingConfig?.is_default) {
-                  e.currentTarget.style.backgroundColor = '#f5f5f5';
-                  e.currentTarget.style.borderColor = '#bfbfbf';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!editingConfig?.is_default) {
-                  e.currentTarget.style.backgroundColor = '#fff';
-                  e.currentTarget.style.borderColor = '#d9d9d9';
-                }
-              }}
-            >
-              <Input
-                placeholder="Enter Your Account Name"
-                disabled={editingConfig?.is_default}
-                autoComplete="new-password"
-                autoCorrect="off"
-                autoCapitalize="off"
-                spellCheck={false}
-                style={{
-                  border: 'none',
-                  outline: 'none',
-                  background: 'transparent',
-                  fontSize: '13px',
-                  fontFamily: '"Museo Sans", sans-serif',
-                  fontWeight: 300,
-                  color: 'rgb(34, 13, 78)',
-                  width: '100%',
-                  padding: '0',
-                  boxShadow: 'none',
-                  height: 'auto'
-                }}
-                onFocus={(e) => {
-                  const parent = e.target.parentElement;
-                  if (parent) {
-                    parent.style.border = '1px solid #722ED1';
-                    parent.style.boxShadow = '0 0 0 2px rgba(114, 46, 209, 0.1)';
-                  }
-                }}
-                onBlur={(e) => {
-                  const parent = e.target.parentElement;
-                  if (parent) {
-                    const hasError = form.getFieldError('account_name').length > 0;
-                    parent.style.border = hasError ? '1px solid #ff4d4f' : '1px solid #d9d9d9';
-                    parent.style.boxShadow = 'none';
-                  }
-                }}
-              />
-            </div>
-          </Form.Item>
-          
-            {/* Account Type下拉框 */}
+            {/* Account Type下拉框 - 第一个位置 */}
           <Form.Item
             name="account_type"
               rules={[{ required: true, message: '' }]}
@@ -1807,6 +1730,83 @@ const Account: React.FC = () => {
                   </div>
                 </div>
               )}
+            </div>
+          </Form.Item>
+
+            {/* Account Name输入框 - 第二个位置 */}
+          <Form.Item
+            name="account_name"
+              rules={[{ required: true, message: '' }]}
+              style={{ marginBottom: 0, width: '100%' }}
+              validateStatus={form.getFieldError('account_name').length > 0 ? 'error' : ''}
+            >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 12px',
+                border: form.getFieldError('account_name').length > 0 ? '1px solid #ff4d4f' : '1px solid #d9d9d9',
+                borderRadius: '4px',
+                background: '#fff',
+                cursor: 'text',
+                fontSize: '13px',
+                fontFamily: '"Museo Sans", sans-serif',
+                fontWeight: 300,
+                color: 'rgb(34, 13, 78)',
+                width: '100%',
+                transition: 'all 0.2s ease',
+                opacity: editingConfig?.is_default ? 0.5 : 1
+              }}
+              onMouseEnter={(e) => {
+                if (!editingConfig?.is_default) {
+                  e.currentTarget.style.backgroundColor = '#f5f5f5';
+                  e.currentTarget.style.borderColor = '#bfbfbf';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!editingConfig?.is_default) {
+                  e.currentTarget.style.backgroundColor = '#fff';
+                  e.currentTarget.style.borderColor = '#d9d9d9';
+                }
+              }}
+            >
+              <Input
+                placeholder="Enter Your Account Name"
+                disabled={editingConfig?.is_default}
+                autoComplete="new-password"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                style={{
+                  border: 'none',
+                  outline: 'none',
+                  background: 'transparent',
+                  fontSize: '13px',
+                  fontFamily: '"Museo Sans", sans-serif',
+                  fontWeight: 300,
+                  color: 'rgb(34, 13, 78)',
+                  width: '100%',
+                  padding: '0',
+                  boxShadow: 'none',
+                  height: 'auto'
+                }}
+                onFocus={(e) => {
+                  const parent = e.target.parentElement;
+                  if (parent) {
+                    parent.style.border = '1px solid #722ED1';
+                    parent.style.boxShadow = '0 0 0 2px rgba(114, 46, 209, 0.1)';
+                  }
+                }}
+                onBlur={(e) => {
+                  const parent = e.target.parentElement;
+                  if (parent) {
+                    const hasError = form.getFieldError('account_name').length > 0;
+                    parent.style.border = hasError ? '1px solid #ff4d4f' : '1px solid #d9d9d9';
+                    parent.style.boxShadow = 'none';
+                  }
+                }}
+              />
             </div>
           </Form.Item>
           

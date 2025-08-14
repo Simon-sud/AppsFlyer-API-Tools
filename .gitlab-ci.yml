@@ -2,14 +2,18 @@ stages:
   - build
   - deploy
 
-# 缓存配置
+# 优化缓存配置
 cache:
   key: 
     files:
       - frontend/package-lock.json
+      - frontend/package.json
   paths:
     - frontend/node_modules/
     - frontend/.npm/
+    - .npm/
+  policy: pull-push
+  when: 'always'
 
 build:
   stage: build
@@ -23,8 +27,13 @@ build:
   script:
     - echo "🚀 开始构建前端项目..."
     - cd frontend
-    - echo "📦 安装依赖（使用缓存）..."
-    - npm ci --cache .npm --prefer-offline
+    - echo "🔍 检查缓存状态..."
+    - echo "缓存目录内容:"
+    - ls -la node_modules/ | head -5 || echo "node_modules目录不存在"
+    - echo "npm缓存目录:"
+    - ls -la .npm/ | head -5 || echo ".npm目录不存在"
+    - echo "📦 安装依赖（使用优化缓存）..."
+    - npm install --cache .npm --prefer-offline --no-audit --no-fund --loglevel=timing
     - echo "🔨 开始构建..."
     - CI=false npm run build
     - echo "✅ 构建完成！"
@@ -41,9 +50,9 @@ deploy:
   image: alpine:latest
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
-      when: manual
+      when: on_success  # 改为自动触发，构建成功后自动部署
   script:
-    - echo "🚀 开始部署到生产环境..."
+    - echo "🚀 开始自动部署到生产环境..."
     - apk add --no-cache openssh-client rsync
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY_BASE64" | base64 -d | ssh-add -
@@ -52,4 +61,4 @@ deploy:
     - chmod 600 ~/.ssh/config
     - echo "📤 同步文件到服务器..."
     - rsync -avz --delete frontend/build/ $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
-    - echo "✅ 部署完成！"
+    - echo "✅ 自动部署完成！"

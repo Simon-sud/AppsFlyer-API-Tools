@@ -1,13 +1,30 @@
+# Flask 核心框架
 flask>=2.2.0
 flask-cors>=3.0.10
 flask-socketio>=5.1.1
+flask-jwt-extended>=4.7.1
+
+# 数据库连接
+mysql-connector-python>=9.3.0
+
+# HTTP 请求和数据处理
 requests>=2.26.0
 python-dotenv>=0.19.0
+
+# 安全相关
 werkzeug>=2.2.0
 PyJWT>=2.10.1
 python-multipart>=0.0.5
+
+# 异步和文件处理
 websockets>=10.0
 aiofiles>=0.7.0
-mysql-connector-python>=9.3.0
-flask-jwt-extended>=4.7.1
-gunicorn>=21.2.0 
+
+# Excel 文件处理
+openpyxl>=3.1.0
+
+# 生产环境部署
+gunicorn>=21.2.0
+
+# 标准库（无需安装）
+# os, sys, json, csv, io, datetime, timedelta, base64, time, asyncio, typing, contextlib, uuid, re, zipfile, shutil, urllib.parse, logging, functools 

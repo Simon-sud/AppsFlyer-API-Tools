@@ -1,30 +1,36 @@
 # Dependencies
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+*/node_modules/
 
-# Production builds
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# 忽略backend/config文件夹中的文件（保留文件夹）
+backend/config/*
+!backend/config/
+
+# 忽略backend/__pycache__文件夹中的文件（保留文件夹）
+backend/__pycache__/*
+!backend/__pycache__/
+
+# Build outputs
+frontend/build/
 dist/
-build/
-.next/
-out/
+*.tar
+*.zip
 
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Logs
+logs/
+*.log
 
-# IDE and editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS generated files
+# OS
 .DS_Store
 .DS_Store?
 ._*
@@ -33,64 +39,23 @@ out/
 ehthumbs.db
 Thumbs.db
 
-# Logs
-logs
-*.log
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
 
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Coverage directory used by tools like istanbul
-coverage/
-
-# nyc test coverage
-.nyc_output
-
-# Dependency directories
-jspm_packages/
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Microbundle cache
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# parcel-bundler cache (https://parceljs.org/)
-.cache
-.parcel-cache
-
-# Next.js build output
-.next
-
-# Nuxt.js build / generate output
-.nuxt
-dist
-
-# Storybook build outputs
-.out
-.storybook-out
-
-# Temporary folders
-tmp/
+# Temporary files
 temp/
+tmp/
+*.tmp
 
-# Local Netlify folder
-.netlify
+# Git
+.git/

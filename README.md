@@ -7,6 +7,35 @@
 ## 🏗️ 项目结构
 
 ```
+
+AppsFlyer_RAWDATA_WEB2_Update/
+├── frontend/                    # 前端代码
+│   ├── src/                    # React源代码
+│   ├── public/                 # 静态资源
+│   ├── package.json            # 前端依赖配置
+│   ├── package-lock.json       # 依赖版本锁定
+│   ├── tsconfig.json           # TypeScript配置
+│   ├── .gitignore              # 前端Git忽略规则
+│   └── node_modules/           # 前端依赖包
+├── backend/                     # 后端代码
+│   ├── app.py                  # 主应用文件
+│   ├── auth.py                 # 认证模块
+│   ├── Config.py               # 配置模块
+│   ├── requirements.txt        # Python依赖
+│   ├── init_db.sql             # 数据库初始化
+│   ├── database/               # 数据库模块
+│   │   ├── __init__.py
+│   │   ├── db.py
+│   │   └── schema.sql
+│   └── config/                 # 配置模块
+│       └── database.py
+├── nginx_server.conf            # Nginx配置
+├── webhook_update.sh            # 自动部署脚本
+├── .gitignore                  # 项目Git忽略规则
+├── .gitlab-ci.yml              # GitLab CI/CD配置
+└── README.md                    # 项目说明
+
+
 frontend/
 ├── src/
 │   ├── components/     # 公共组件

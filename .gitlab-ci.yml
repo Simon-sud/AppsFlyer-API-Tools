@@ -2,34 +2,54 @@ stages:
   - build
   - deploy
 
+# 缓存配置
+cache:
+  key: 
+    files:
+      - frontend/package-lock.json
+  paths:
+    - frontend/node_modules/
+    - frontend/.npm/
+
 build:
   stage: build
   image: node:18
+  rules:
+    - changes:
+        - frontend/**/*
+        - .gitlab-ci.yml
+      when: always
+    - when: never
   script:
-    - pwd
-    - ls -la
+    - echo "🚀 开始构建前端项目..."
     - cd frontend
-    - pwd
-    - ls -la
-    - cat package.json | grep -A 5 -B 5 "scripts"
-    - npm install
+    - echo "📦 安装依赖（使用缓存）..."
+    - npm ci --cache .npm --prefer-offline
+    - echo "🔨 开始构建..."
     - CI=false npm run build
+    - echo "✅ 构建完成！"
   artifacts:
     paths:
-      - frontend/dist/
+      - frontend/build/
+    expire_in: 1 week
+    reports:
+      junit: frontend/build/test-results.xml
+  coverage: '/All files[^|]*\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|[^|]*\s+(\d+)/'
 
 deploy:
   stage: deploy
   image: alpine:latest
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
   script:
-    - echo "Deploying to production"
+    - echo "🚀 开始部署到生产环境..."
     - apk add --no-cache openssh-client rsync
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY_BASE64" | base64 -d | ssh-add -
     - mkdir -p ~/.ssh
     - echo "StrictHostKeyChecking no" >> ~/.ssh/config
     - chmod 600 ~/.ssh/config
-    - rsync -avz --delete frontend/dist/ $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
-  only:
-    - main
-  when: manual
+    - echo "📤 同步文件到服务器..."
+    - rsync -avz --delete frontend/build/ $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
+    - echo "✅ 部署完成！"

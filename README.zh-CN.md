@@ -2,21 +2,21 @@
 
 # AppsFlyer-API-Tools
 
-### All-in-one AppsFlyer data workbench
+### AppsFlyer 一体化数据工作台
 
-Account setup · raw data query · dashboards · AutoPipe pipelines · Dispatch tokens · industry benchmarks · app download estimator · store discovery · built-in AI chat (Gochat)
-
-<br />
-
-**English** · [**简体中文**](./README.zh-CN.md)
+账户配置 · 原始数据查询 · Dashboard · AutoPipe 调度 · Dispatch 令牌 · 行业 Benchmark · App 下载估算 · 应用发现 · 内置 AI 助手 Gochat
 
 <br />
 
-[**Environment**](./ENVIRONMENT.md) · [**Deployment**](./DEPLOY.md) · [**GitHub Guide**](./GITHUB.md)
+[**English**](./README.md) · **简体中文**
 
 <br />
 
-Production deploys do **not** require Git — copy or rsync the project directory to your server.
+[**环境配置**](./ENVIRONMENT.md) · [**生产部署**](./DEPLOY.md) · [**GitHub 指南**](./GITHUB.md)
+
+<br />
+
+部署不依赖 Git，将项目目录拷贝或 rsync 到服务器即可。
 
 <br />
 
@@ -26,14 +26,14 @@ Production deploys do **not** require Git — copy or rsync the project director
 
 <div align="center">
 
-## Modules
+## 功能模块
 
 <table>
 <thead>
 <tr>
-<th align="center">Route</th>
-<th align="center">Module</th>
-<th align="center">Backend</th>
+<th align="center">路由</th>
+<th align="center">模块</th>
+<th align="center">后端</th>
 </tr>
 </thead>
 <tbody>
@@ -65,12 +65,12 @@ Production deploys do **not** require Git — copy or rsync the project director
 <tr>
 <td align="center"><code>/app-estimator</code></td>
 <td align="center">App Estimator</td>
-<td align="center">Go <code>:5001</code> (OpenClaw SQLite)</td>
+<td align="center">Go <code>:5001</code>（OpenClaw SQLite）</td>
 </tr>
 <tr>
 <td align="center"><code>/apps</code></td>
 <td align="center">Apps Finder</td>
-<td align="center">Scraper <code>:3001</code> (optional)</td>
+<td align="center">Scraper <code>:3001</code>（可选）</td>
 </tr>
 <tr>
 <td align="center"><code>/account</code></td>
@@ -79,18 +79,18 @@ Production deploys do **not** require Git — copy or rsync the project director
 </tr>
 <tr>
 <td align="center"><code>/docs</code></td>
-<td align="center">Product docs</td>
-<td align="center">Static</td>
+<td align="center">产品文档</td>
+<td align="center">静态页</td>
 </tr>
 <tr>
-<td align="center">Top bar drawer</td>
+<td align="center">顶栏抽屉</td>
 <td align="center">Gochat</td>
 <td align="center">Go <code>:5002</code></td>
 </tr>
 </tbody>
 </table>
 
-<p><sub>Gochat is a global sidebar assistant (no dedicated route). PostgreSQL is required for session storage.</sub></p>
+<p><sub>Gochat 为全局侧栏助手（无独立路由），启用时需 PostgreSQL 存储会话。</sub></p>
 
 </div>
 
@@ -98,47 +98,47 @@ Production deploys do **not** require Git — copy or rsync the project director
 
 <div align="center">
 
-## Tech Stack
+## 技术栈
 
 <table>
 <thead>
 <tr>
-<th align="center">Layer</th>
-<th align="center">Technology</th>
+<th align="center">层级</th>
+<th align="center">技术</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="center">Frontend</td>
-<td align="center">React 19, TypeScript, CRA, Tailwind, D3, Recharts</td>
+<td align="center">前端</td>
+<td align="center">React 19、TypeScript、CRA、Tailwind、D3、Recharts</td>
 </tr>
 <tr>
-<td align="center">Primary API</td>
+<td align="center">主 API</td>
 <td align="center">Python Flask — <strong>5000</strong></td>
 </tr>
 <tr>
-<td align="center">Tasks / analytics API</td>
-<td align="center">Go <code>autopipe_runner</code> (tag: <code>autopipe</code>) — <strong>5001</strong></td>
+<td align="center">任务 / 分析 API</td>
+<td align="center">Go <code>autopipe_runner</code>（tag: <code>autopipe</code>）— <strong>5001</strong></td>
 </tr>
 <tr>
-<td align="center">AI chat</td>
-<td align="center">Go <code>ai_chat_service</code> (tag: <code>!autopipe</code>) — <strong>5002</strong></td>
+<td align="center">AI 对话</td>
+<td align="center">Go <code>ai_chat_service</code>（tag: <code>!autopipe</code>）— <strong>5002</strong></td>
 </tr>
 <tr>
-<td align="center">Store scraper</td>
-<td align="center">Node Scraper-backend — <strong>3001</strong> (optional)</td>
+<td align="center">商店抓取</td>
+<td align="center">Node Scraper-backend — <strong>3001</strong>（可选）</td>
 </tr>
 <tr>
-<td align="center">Primary DB</td>
+<td align="center">主库</td>
 <td align="center">MySQL 8+</td>
 </tr>
 <tr>
-<td align="center">Chat DB</td>
-<td align="center">PostgreSQL 15+ (Gochat)</td>
+<td align="center">对话库</td>
+<td align="center">PostgreSQL 15+（Gochat）</td>
 </tr>
 <tr>
-<td align="center">Entry</td>
-<td align="center">Nginx → <code>frontend/build</code> + reverse proxy</td>
+<td align="center">入口</td>
+<td align="center">Nginx → <code>frontend/build</code> + 反向代理</td>
 </tr>
 </tbody>
 </table>
@@ -149,13 +149,13 @@ Production deploys do **not** require Git — copy or rsync the project director
 
 <div align="center">
 
-## Ports
+## 端口
 
 <table>
 <thead>
 <tr>
-<th align="center">Port</th>
-<th align="center">Service</th>
+<th align="center">端口</th>
+<th align="center">服务</th>
 </tr>
 </thead>
 <tbody>
@@ -165,7 +165,7 @@ Production deploys do **not** require Git — copy or rsync the project director
 </tr>
 <tr>
 <td align="center"><code>3000</code></td>
-<td align="center">Frontend dev server (local only)</td>
+<td align="center">前端开发服（仅本地）</td>
 </tr>
 <tr>
 <td align="center"><code>3001</code></td>
@@ -177,7 +177,7 @@ Production deploys do **not** require Git — copy or rsync the project director
 </tr>
 <tr>
 <td align="center"><code>5001</code></td>
-<td align="center">AutoPipe Runner (Dashboard / AutoPipe / Benchmark / App Estimator)</td>
+<td align="center">AutoPipe Runner（Dashboard / AutoPipe / Benchmark / App Estimator）</td>
 </tr>
 <tr>
 <td align="center"><code>5002</code></td>
@@ -192,7 +192,7 @@ Production deploys do **not** require Git — copy or rsync the project director
 
 <div align="center">
 
-## Project Layout
+## 目录结构
 
 </div>
 
@@ -200,14 +200,14 @@ Production deploys do **not** require Git — copy or rsync the project director
 ├── frontend/
 │   ├── src/pages/
 │   ├── src/lib/appEstimator/
-│   ├── build/              # npm run build output
+│   ├── build/              # npm run build 产出
 │   └── Scraper-backend/
 ├── backend/
 │   ├── app.py / auth.py
 │   ├── autopipe_runner.go
 │   ├── app_estimator*.go
 │   ├── ai_chat_service.go
-│   ├── scripts/            # Estimator pipeline scripts
+│   ├── scripts/            # Estimator 流水线脚本
 │   ├── database/
 │   ├── systemd/
 │   ├── start_services_optimized.sh
@@ -224,25 +224,25 @@ Production deploys do **not** require Git — copy or rsync the project director
 
 <div align="center">
 
-## Local Development
+## 本地开发
 
-<p><strong>Requirements:</strong> Node 18+, Python 3.9+, Go 1.21+, MySQL 8+; PostgreSQL 15+ for Gochat</p>
+<p><strong>依赖：</strong>Node 18+、Python 3.9+、Go 1.21+、MySQL 8+；（Gochat）PostgreSQL 15+</p>
 
 </div>
 
 ```bash
-# Install dependencies
+# 安装依赖
 cd frontend && npm install
 cd ../backend && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt
 go mod download
 
-# One-command start (checks DB, launches backends + frontend)
+# 一键启动（检查 DB、拉起后端 + 前端）
 cd .. && bash start.sh
 ```
 
 <div align="center">
 
-<p><strong>Start services individually</strong></p>
+<p><strong>分服务启动</strong></p>
 
 </div>
 
@@ -255,7 +255,7 @@ go build -tags '!autopipe' -o ai_chat_service . && AI_CHAT_PORT=:5002 ./ai_chat_
 
 <div align="center">
 
-<p><strong>Health checks</strong></p>
+<p><strong>健康检查</strong></p>
 
 </div>
 
@@ -270,21 +270,21 @@ curl -s http://127.0.0.1:5002/api/health
 
 <div align="center">
 
-## Environment Variables (summary)
+## 环境变量（摘要）
 
-<p>Production: <code>/etc/appsflyer/backend.env</code> — see <code>backend/systemd/README.md</code></p>
+<p>生产环境统一使用 <code>/etc/appsflyer/backend.env</code>（见 <code>backend/systemd/README.md</code>）</p>
 
 <table>
 <thead>
 <tr>
-<th align="center">Variable</th>
-<th align="center">Purpose</th>
+<th align="center">变量</th>
+<th align="center">用途</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td align="center"><code>JWT_SECRET_KEY</code></td>
-<td align="center">Shared by Flask / Go :5001 / Go :5002</td>
+<td align="center">Flask / Go5001 / Go5002 共用</td>
 </tr>
 <tr>
 <td align="center"><code>DB_*</code></td>
@@ -292,28 +292,28 @@ curl -s http://127.0.0.1:5002/api/health
 </tr>
 <tr>
 <td align="center"><code>PG_*</code></td>
-<td align="center">PostgreSQL (Gochat)</td>
+<td align="center">PostgreSQL（Gochat）</td>
 </tr>
 <tr>
 <td align="center"><code>MIIMO_*</code></td>
-<td align="center">Gochat upstream (required in production)</td>
+<td align="center">Gochat 上游（生产必填）</td>
 </tr>
 <tr>
 <td align="center"><code>APP_ESTIMATOR_*</code></td>
-<td align="center">Estimator SQLite path &amp; pipeline</td>
+<td align="center">Estimator SQLite 路径与内置流水线</td>
 </tr>
 <tr>
 <td align="center"><code>CORS_ORIGIN</code> / <code>CORS_ORIGINS</code></td>
-<td align="center">Allowed origins in production</td>
+<td align="center">生产跨域来源</td>
 </tr>
 <tr>
 <td align="center"><code>REDIS_ADDR</code></td>
-<td align="center">Benchmark cache (optional)</td>
+<td align="center">Benchmark 缓存（可选）</td>
 </tr>
 </tbody>
 </table>
 
-<p>Full guide: <a href="./ENVIRONMENT.md"><strong>ENVIRONMENT.md</strong></a> · template: <code>backend/.env.example</code></p>
+<p>完整说明：<a href="./ENVIRONMENT.md"><strong>ENVIRONMENT.md</strong></a> · 模板：<code>backend/.env.example</code></p>
 
 </div>
 
@@ -321,9 +321,9 @@ curl -s http://127.0.0.1:5002/api/health
 
 <div align="center">
 
-## Production Deployment
+## 生产部署
 
-<p>Full steps: <a href="./DEPLOY.md"><strong>DEPLOY.md</strong></a></p>
+<p>完整步骤：<a href="./DEPLOY.md"><strong>DEPLOY.md</strong></a></p>
 
 </div>
 
@@ -336,7 +336,7 @@ sudo bash scripts/update_nginx.sh
 
 <div align="center">
 
-<p>In-app product documentation: <code>/docs</code></p>
+<p>产品说明见应用内 <code>/docs</code></p>
 
 <br />
 

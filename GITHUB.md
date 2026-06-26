@@ -1,172 +1,192 @@
-# 推送到 GitHub 操作指南
+<div align="center">
 
-按顺序执行。工作目录均为项目根目录：
+# GitHub Push Guide
+
+### AppsFlyer-API-Tools
+
+Step-by-step guide to push this project to GitHub safely.
+
+<br />
+
+**English** · [**简体中文**](./GITHUB.zh-CN.md)
+
+<br />
+
+[**README**](./README.md) · [**Environment**](./ENVIRONMENT.md) · [**Deployment**](./DEPLOY.md)
+
+<br />
+
+<p>Working directory: project root</p>
+
+</div>
+
+---
+
+<div align="center">
+
+## 1. Files to Include
+
+<table>
+<thead>
+<tr>
+<th align="center">Category</th>
+<th align="center">Paths</th>
+<th align="center">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr><td align="center">Docs</td><td align="center"><code>README.md</code>, <code>DEPLOY.md</code>, <code>ENVIRONMENT.md</code></td><td align="center">Deployment &amp; env guides</td></tr>
+<tr><td align="center">Scripts</td><td align="center"><code>start.sh</code>, <code>scripts/</code></td><td align="center">Local / production</td></tr>
+<tr><td align="center">Nginx</td><td align="center"><code>nginx_server.conf</code></td><td align="center">Placeholder domains</td></tr>
+<tr><td align="center">Backend Python</td><td align="center"><code>backend/*.py</code>, <code>database/</code>, <code>migrations/</code></td><td align="center">Business logic &amp; schema</td></tr>
+<tr><td align="center">Backend Go</td><td align="center"><code>backend/*.go</code>, <code>go.mod</code>, <code>go.sum</code></td><td align="center">Source &amp; lockfile</td></tr>
+<tr><td align="center">Config templates</td><td align="center"><code>backend/.env.example</code></td><td align="center"><strong>No secrets</strong></td></tr>
+<tr><td align="center">Frontend</td><td align="center"><code>frontend/src/</code>, <code>package.json</code></td><td align="center">Exclude <code>build/</code></td></tr>
+<tr><td align="center">Scraper</td><td align="center"><code>frontend/Scraper-backend/</code></td><td align="center">Exclude <code>node_modules/</code></td></tr>
+</tbody>
+</table>
+
+</div>
+
+---
+
+<div align="center">
+
+## 2. Never Push
+
+<table>
+<thead>
+<tr>
+<th align="center">Path</th>
+<th align="center">Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr><td align="center"><code>backend/.env</code>, <code>frontend/.env</code></td><td align="center">Passwords, API keys</td></tr>
+<tr><td align="center"><code>**/node_modules/</code></td><td align="center">Large — use <code>npm ci</code></td></tr>
+<tr><td align="center"><code>frontend/build/</code></td><td align="center">Build on server</td></tr>
+<tr><td align="center"><code>backend/vendor/</code></td><td align="center">~200MB — use <code>go mod download</code></td></tr>
+<tr><td align="center"><code>backend/bin/</code>, binaries</td><td align="center">Compiled artifacts</td></tr>
+<tr><td align="center"><code>__pycache__/</code>, <code>.DS_Store</code></td><td align="center">Cache / local files</td></tr>
+</tbody>
+</table>
+
+<p>Excluded by root <code>.gitignore</code> — confirm it exists before pushing</p>
+
+</div>
+
+---
+
+<div align="center">
+
+## 3. Pre-Push Checklist
+
+</div>
 
 ```bash
-cd /Users/Zhuanz/Documents/AppsFlyer_RAWDATA_WEB2_Update_Develop
-```
+cd /path/to/AppsFlyer_RAWDATA_WEB2_Update_Develop
 
----
-
-## 1. 推送前应包含的文件
-
-| 类别 | 路径 | 说明 |
-|------|------|------|
-| 文档 | `README.md`、`DEPLOY.md`、`ENVIRONMENT.md`、`GITHUB.md` | 部署与环境说明 |
-| 启动脚本 | `start.sh`、`scripts/` | 本地/生产脚本 |
-| Nginx | `nginx_server.conf` | 模板（已占位化域名） |
-| 后端 Python | `backend/*.py`、`backend/database/`、`backend/migrations/`、`backend/config/` | 业务与 schema |
-| 后端 Go | `backend/*.go`、`backend/go.mod`、`backend/go.sum` | 源码与依赖锁定 |
-| 后端脚本 | `backend/scripts/`、`backend/*.sh`、`backend/systemd/`、`backend/Makefile` | 初始化与运维 |
-| 配置模板 | `backend/.env.example`、`frontend/Scraper-backend/env.example` | **仅模板，无密钥** |
-| 前端 | `frontend/src/`、`frontend/public/`、`frontend/package.json`、`frontend/package-lock.json` 等 | 不含 `build/` |
-| Scraper | `frontend/Scraper-backend/*.js`、`package.json`、`README.md` | 不含 `node_modules/` |
-| 根依赖 | `package.json`、`package-lock.json`（可选） | 根目录少量共享依赖 |
-| 类型 | `pyrightconfig.json`、`typings/`（如有） | 开发辅助 |
-
----
-
-## 2. 切勿推送的文件
-
-| 路径 | 原因 |
-|------|------|
-| `backend/.env`、`frontend/.env` | 含密码、API Key |
-| `**/node_modules/` | 体积大，用 `npm ci` 安装 |
-| `frontend/build/` | 构建产物，服务器上 `npm run build` |
-| `backend/vendor/` | ~237MB，部署时 `go mod download` |
-| `backend/bin/`、`backend/autopipe_runner` | 编译二进制 |
-| `**/__pycache__/`、`backend/temp/` | 缓存与临时文件 |
-| `.DS_Store`、`.vscode/` | 本机环境 |
-
-已由根目录 `.gitignore` 排除（推送前确认该文件存在）。
-
----
-
-## 3. 推送前检查（必做）
-
-```bash
-cd /Users/Zhuanz/Documents/AppsFlyer_RAWDATA_WEB2_Update_Develop
-
-# 确认 .gitignore 存在
 test -f .gitignore && echo "OK: .gitignore"
-
-# 确认敏感 env 不会被加入
 git check-ignore -v backend/.env frontend/.env 2>/dev/null || true
-
-# 预览将要提交的内容（不应出现 .env、node_modules、vendor、build）
 git status
-
-# 若曾误 add 过大目录，先取消跟踪：
-# git rm -r --cached backend/vendor frontend/node_modules frontend/build 2>/dev/null || true
+git diff --cached --stat   # after git add
 ```
 
-**安全提醒：** 当前 `git remote -v` 里若 `origin` 带有 GitLab Token，请勿把该 URL 提交到公开仓库；建议在 GitLab 轮换 Token，GitHub 使用 SSH 或凭据管理器。
+<div align="center">
+
+<p><strong>Security:</strong> Do not embed tokens in remote URLs. Use SSH or a credential manager for GitHub.</p>
+
+</div>
 
 ---
 
-## 4. 在 GitHub 创建空仓库
+<div align="center">
 
-1. 打开 https://github.com/new  
-2. Repository name：例如 `AppsFlyer-RAWDATA-Workbench`  
-3. **不要**勾选 “Add a README” / “Add .gitignore”（本地已有）  
-4. 创建后记下：`https://github.com/<你的用户名>/<仓库名>.git`
+## 4. Create GitHub Repository
+
+<p>1. Open <a href="https://github.com/new">github.com/new</a><br />
+2. Name e.g. <code>AppsFlyer-API-Tools</code><br />
+3. Do <strong>not</strong> add README / .gitignore (local copies exist)<br />
+4. Note URL: <code>https://github.com/&lt;user&gt;/&lt;repo&gt;.git</code></p>
+
+</div>
 
 ---
 
-## 5. 提交本地更改
+<div align="center">
+
+## 5. Commit &amp; Push
+
+</div>
 
 ```bash
-cd /Users/Zhuanz/Documents/AppsFlyer_RAWDATA_WEB2_Update_Develop
-
-# 加入所有应跟踪文件（.gitignore 会自动排除禁止项）
 git add .
+git commit -m "feat: AppsFlyer workbench with Go services and deployment docs"
 
-# 再次确认 staged 列表无敏感文件
-git diff --cached --stat
-
-# 提交（按实际改动调整说明）
-git commit -m "$(cat <<'EOF'
-feat: workbench modules, deploy docs, and env configuration guide
-
-Add App Estimator, Gochat, Benchmark, AutoPipe; sanitize secrets; document local and production env setup.
-EOF
-)"
-```
-
-若提示 `nothing to commit`，说明已提交过，可跳到第 6 步。
-
----
-
-## 6. 添加 GitHub 远程并推送
-
-**方式 A：保留 GitLab `origin`，新增 `github` 远程（推荐）**
-
-```bash
-git remote add github https://github.com/<你的用户名>/<仓库名>.git
-# 或使用 SSH：
-# git remote add github git@github.com:<你的用户名>/<仓库名>.git
-
+git remote add github https://github.com/Simon-sud/AppsFlyer-API-Tools.git
 git push -u github main
 ```
 
-**方式 B：仅用 GitHub 作为主远程**
+<div align="center">
 
-```bash
-git remote rename origin gitlab    # 可选：保留旧 GitLab 地址
-git remote add origin https://github.com/<你的用户名>/<仓库名>.git
-git push -u origin main
-```
+<p>If <code>github</code> remote exists: <code>git push github main</code></p>
 
-首次推送若 GitHub 默认分支为 `master` 而本地为 `main`：
-
-```bash
-git push -u github main:main
-```
+</div>
 
 ---
 
-## 7. 推送后验证
+<div align="center">
 
-在 GitHub 网页上确认：
+## 6. Post-Push Verification
 
-- [ ] 有 `ENVIRONMENT.md`、`DEPLOY.md`、`backend/.env.example`
-- [ ] **没有** `backend/.env`、`frontend/.env`
-- [ ] **没有** `node_modules/`、`frontend/build/`、`backend/vendor/`
-- [ ] `nginx_server.conf` 中为占位域名，非真实生产 IP
+<table>
+<thead>
+<tr>
+<th align="center">Check</th>
+<th align="center">Expected</th>
+</tr>
+</thead>
+<tbody>
+<tr><td align="center">Docs present</td><td align="center"><code>ENVIRONMENT.md</code>, <code>DEPLOY.md</code>, <code>backend/.env.example</code></td></tr>
+<tr><td align="center">Secrets absent</td><td align="center">No <code>.env</code>, <code>node_modules</code>, <code>vendor</code></td></tr>
+<tr><td align="center">Nginx config</td><td align="center">Placeholder domains only</td></tr>
+</tbody>
+</table>
 
-克隆验证（另一目录）：
+</div>
 
 ```bash
 cd /tmp
-git clone https://github.com/<你的用户名>/<仓库名>.git test-clone
-cd test-clone
-ls backend/.env.example ENVIRONMENT.md
-# 不应存在 backend/.env
+git clone https://github.com/Simon-sud/AppsFlyer-API-Tools.git test-clone
+ls test-clone/backend/.env.example
+# backend/.env should NOT exist
 ```
 
 ---
 
-## 8. 新环境从 GitHub 拉取后的安装
+<div align="center">
+
+## 7. Clone &amp; Install (new machine)
+
+</div>
 
 ```bash
-git clone https://github.com/<你的用户名>/<仓库名>.git
-cd <仓库名>
+git clone https://github.com/Simon-sud/AppsFlyer-API-Tools.git
+cd AppsFlyer-API-Tools
 
-cp backend/.env.example backend/.env    # 本地开发再编辑
+cp backend/.env.example backend/.env
 cd backend && python3 -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-go mod download
+pip install -r requirements.txt && go mod download
 
 cd ../frontend && npm ci
-cd Scraper-backend && npm ci   # Apps Finder 需要时
-
-# 详见 ENVIRONMENT.md、README.md
 ```
 
----
+<div align="center">
 
-## 9. 相关文档
+<p>See <a href="./ENVIRONMENT.md">ENVIRONMENT.md</a> and <a href="./README.md">README.md</a> for full setup</p>
 
-- 环境变量：[ENVIRONMENT.md](./ENVIRONMENT.md)
-- 生产部署：[DEPLOY.md](./DEPLOY.md)
-- 项目概览：[README.md](./README.md)
+<br />
+
+<sub>AppsFlyer-API-Tools · GitHub Workflow</sub>
+
+</div>

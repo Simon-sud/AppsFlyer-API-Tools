@@ -12,7 +12,7 @@
 
 <br />
 
-[**环境配置**](./ENVIRONMENT.md) · [**生产部署**](./DEPLOY.md) · [**GitHub 指南**](./GITHUB.md)
+[**环境配置**](./ENVIRONMENT.zh-CN.md) · [**生产部署**](./DEPLOY.zh-CN.md) · [**GitHub 指南**](./GITHUB.zh-CN.md)
 
 <br />
 
@@ -313,7 +313,7 @@ curl -s http://127.0.0.1:5002/api/health
 </tbody>
 </table>
 
-<p>完整说明：<a href="./ENVIRONMENT.md"><strong>ENVIRONMENT.md</strong></a> · 模板：<code>backend/.env.example</code></p>
+<p>完整说明：<a href="./ENVIRONMENT.zh-CN.md"><strong>ENVIRONMENT.zh-CN.md</strong></a> · <a href="./ENVIRONMENT.md">English</a> · 模板：<code>backend/.env.example</code></p>
 
 </div>
 
@@ -323,7 +323,7 @@ curl -s http://127.0.0.1:5002/api/health
 
 ## 生产部署
 
-<p>完整步骤：<a href="./DEPLOY.md"><strong>DEPLOY.md</strong></a></p>
+<p>完整步骤：<a href="./DEPLOY.zh-CN.md"><strong>DEPLOY.zh-CN.md</strong></a> · <a href="./DEPLOY.md">English</a></p>
 
 </div>
 

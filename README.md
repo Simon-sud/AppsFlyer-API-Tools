@@ -313,7 +313,7 @@ curl -s http://127.0.0.1:5002/api/health
 </tbody>
 </table>
 
-<p>Full guide: <a href="./ENVIRONMENT.md"><strong>ENVIRONMENT.md</strong></a> · template: <code>backend/.env.example</code></p>
+<p>Full guide: <a href="./ENVIRONMENT.md"><strong>ENVIRONMENT.md</strong></a> · <a href="./ENVIRONMENT.zh-CN.md">中文</a> · template: <code>backend/.env.example</code></p>
 
 </div>
 
@@ -323,7 +323,7 @@ curl -s http://127.0.0.1:5002/api/health
 
 ## Production Deployment
 
-<p>Full steps: <a href="./DEPLOY.md"><strong>DEPLOY.md</strong></a></p>
+<p>Full steps: <a href="./DEPLOY.md"><strong>DEPLOY.md</strong></a> · <a href="./DEPLOY.zh-CN.md">中文</a></p>
 
 </div>
 

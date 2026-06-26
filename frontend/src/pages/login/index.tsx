@@ -1,540 +1,743 @@
-import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Checkbox, message, Row, Col } from 'antd';
-import { UserOutlined, LockOutlined, MailOutlined, ArrowLeftOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
-import styled, { keyframes } from 'styled-components';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { axiosInstance } from '../../services/api';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardAction, CardFooter } from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
+import { message } from '../../components/ui/toast';
+import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '../../components/ui/input-otp';
 
-// 定义响应数据类型
-interface LoginResponse {
-  token: string;
-  user: {
-    id: string;
-    email: string;
-    role: string;
-    apiToken?: string;
-    appId?: string;
-    appName?: string;
-  };
-  message?: string;
-}
+// Removed unused interfaces: LoginFormData, TwoFactorFormData, LoginResponse
 
-// 动画效果
-const fadeIn = keyframes`
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-`;
+// Eye icon components
+const EyeIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+  </svg>
+);
 
-// 激光雨动画
-const laserRain = keyframes`
-  0% { 
-    transform: translateY(-100px) translateX(0px) rotate(0deg); 
-    opacity: 0; 
-  }
-  10% { 
-    opacity: 1; 
-  }
-  90% { 
-    opacity: 1; 
-  }
-  100% { 
-    transform: translateY(100vh) translateX(100px) rotate(360deg); 
-    opacity: 0; 
-  }
-`;
+const EyeOffIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+  </svg>
+);
 
-const pulseGlow = keyframes`
-  0%, 100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.3); }
-  50% { box-shadow: 0 0 40px rgba(255, 255, 255, 0.6); }
-`;
-
-const LoginContainer = styled.div<{ timeTheme: string }>`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  position: relative;
-  overflow: hidden;
-  background: ${props => {
-    switch (props.timeTheme) {
-      case 'morning':
-        return 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 25%, #fecfef 75%, #ff9a9e 100%)';
-      case 'noon':
-        return 'linear-gradient(135deg, #a8edea 0%, #fed6e3 25%, #fed6e3 75%, #a8edea 100%)';
-      case 'afternoon':
-        return 'linear-gradient(135deg, #667eea 0%, #764ba2 25%, #764ba2 75%, #667eea 100%)';
-      case 'evening':
-        return 'linear-gradient(135deg, #f093fb 0%, #f5576c 25%, #f5576c 75%, #f093fb 100%)';
-      case 'night':
-        return 'linear-gradient(135deg, #4facfe 0%, #00f2fe 25%, #00f2fe 75%, #4facfe 100%)';
-      default:
-        return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-    }
-  }};
-`;
-
-
-
-const Title = styled.h2`
-  font-size: 24px;
-  font-weight: 600;
-  color: #1a237e;
-  margin-bottom: 32px;
-  text-align: center;
-`;
-
-const FormContainer = styled.div`
-  .ant-form-item { margin-bottom: 24px; }
-  .ant-input-affix-wrapper { border-radius: 8px; height: 48px; font-size: 16px; }
-  .ant-input { font-size: 16px; }
-  .ant-btn {
-    height: 48px; font-size: 18px; border-radius: 8px;
-    background: #0866ff; border: none; font-weight: 500;
-  }
-  .ant-btn:hover { background: #005ae0; }
-
-  /* 去除浏览器自动填充的高亮背景 */
-  input:-webkit-autofill,
-  input:-webkit-autofill:focus,
-  input:-webkit-autofill:hover,
-  input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
-    box-shadow: 0 0 0 1000px #fff inset !important;
-    -webkit-text-fill-color: #2d2d2d !important;
-    caret-color: #2d2d2d !important;
-    transition: background-color 5000s ease-in-out 0s;
-  }
-`;
-
-const BottomText = styled.div`
-  margin-top: 32px;
-  text-align: center;
-  color: #2d2d2d;
-  font-size: 16px;
-`;
-
-const LinkText = styled.a`
-  color: #0866ff;
-  font-weight: 500;
-  margin-left: 8px;
-  cursor: pointer;
-  &:hover { text-decoration: underline; }
-`;
-
-const ForgotLink = styled.a`
-  color: #0866ff;
-  float: right;
-  font-size: 15px;
-  font-weight: 500;
-  margin-top: 2px;
-  cursor: pointer;
-  &:hover { text-decoration: underline; }
-`;
-
-// 激光雨组件
-const LaserBeam = styled.div<{ delay: number; left: number; timeTheme: string }>`
-  position: absolute;
-  width: 2px;
-  height: 100px;
-  background: ${props => {
-    switch (props.timeTheme) {
-      case 'morning':
-        return 'linear-gradient(to bottom, rgba(255, 154, 158, 0.8), rgba(254, 207, 239, 0.4))';
-      case 'noon':
-        return 'linear-gradient(to bottom, rgba(168, 237, 234, 0.8), rgba(254, 214, 227, 0.4))';
-      case 'afternoon':
-        return 'linear-gradient(to bottom, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.4))';
-      case 'evening':
-        return 'linear-gradient(to bottom, rgba(240, 147, 251, 0.8), rgba(245, 87, 108, 0.4))';
-      case 'night':
-        return 'linear-gradient(to bottom, rgba(79, 172, 254, 0.8), rgba(0, 242, 254, 0.4))';
-      default:
-        return 'linear-gradient(to bottom, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.4))';
-    }
-  }};
-  box-shadow: ${props => {
-    switch (props.timeTheme) {
-      case 'morning':
-        return '0 0 10px rgba(255, 154, 158, 0.6), 0 0 20px rgba(255, 154, 158, 0.3)';
-      case 'noon':
-        return '0 0 10px rgba(168, 237, 234, 0.6), 0 0 20px rgba(168, 237, 234, 0.3)';
-      case 'afternoon':
-        return '0 0 10px rgba(102, 126, 234, 0.6), 0 0 20px rgba(102, 126, 234, 0.3)';
-      case 'evening':
-        return '0 0 10px rgba(240, 147, 251, 0.6), 0 0 20px rgba(240, 147, 251, 0.3)';
-      case 'night':
-        return '0 0 10px rgba(79, 172, 254, 0.6), 0 0 20px rgba(79, 172, 254, 0.3)';
-      default:
-        return '0 0 10px rgba(102, 126, 234, 0.6), 0 0 20px rgba(102, 126, 234, 0.3)';
-    }
-  }};
-  left: ${props => props.left}%;
-  animation: ${laserRain} ${props => 3 + props.delay * 0.5}s linear infinite;
-  animation-delay: ${props => props.delay}s;
-  transform-origin: center bottom;
-`;
-
-// 增强的登录框样式
-const LoginBox = styled.div<{ timeTheme: string }>`
-  width: 420px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  padding: 40px 32px 24px 32px;
-  animation: ${fadeIn} 0.7s, ${pulseGlow} 3s ease-in-out infinite;
-  position: relative;
-  z-index: 10;
-`;
-
-const RecoveryError = styled.div`
-  color: #e53935;
-  font-size: 15px;
-  margin-top: 4px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-`;
-
-const RecoveryButton = styled(Button)<{disabled?: boolean}>`
-  width: 100%;
-  height: 48px;
-  font-size: 18px;
-  border-radius: 8px;
-  background: ${({disabled}) => (disabled ? '#f5f6fa' : '#0866ff')} !important;
-  color: ${({disabled}) => (disabled ? '#b0b3b8' : '#fff')} !important;
-  border: none;
-  font-weight: 500;
-  margin-top: 16px;
-  cursor: ${({disabled}) => (disabled ? 'not-allowed' : 'pointer')};
-  transition: background 0.2s;
-  &:hover {
-    background: ${({disabled}) => (disabled ? '#f5f6fa' : '#005ae0')} !important;
-    color: ${({disabled}) => (disabled ? '#b0b3b8' : '#fff')} !important;
-  }
-`;
-
-const BackLink = styled.a`
-  display: flex;
-  align-items: center;
-  color: #0866ff;
-  font-size: 15px;
-  font-weight: 500;
-  margin-bottom: 24px;
-  cursor: pointer;
-  &:hover { text-decoration: underline; }
-`;
-
-interface LoginFormValues {
-  email: string;
-  password: string;
-  remember?: boolean;
-}
 
 const Login: React.FC = () => {
-  const [loading, setLoading] = useState(false);
-  const [showRecovery, setShowRecovery] = useState(false);
-  const [recoveryEmail, setRecoveryEmail] = useState('');
-  const [recoveryError, setRecoveryError] = useState('');
-  const [recoveryTouched, setRecoveryTouched] = useState(false);
-  const [loginError, setLoginError] = useState('');
-  const [timeTheme, setTimeTheme] = useState('afternoon');
-  const navigate = useNavigate();
-  const [form] = Form.useForm<LoginFormValues>();
   const { login } = useAuth();
-
-  // 根据时间设置主题
+  const navigate = useNavigate();
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [twoFactorLoading, setTwoFactorLoading] = useState(false);
+  const [show2FA, setShow2FA] = useState(false);
+  const [twoFactorData, setTwoFactorData] = useState<any>(null);
+  const [qrModalData, setQrModalData] = useState<any>(null);
+  const [buttonShake, setButtonShake] = useState(false);
+  const [totpCode, setTotpCode] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  
+  // Form state
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [isComposing, setIsComposing] = useState(false);
+  
+  // Autofill: off initially, enabled on user interaction
+  const [emailAutoComplete, setEmailAutoComplete] = useState<string>('off');
+  const [passwordAutoComplete, setPasswordAutoComplete] = useState<string>('new-password');
+  
+  // Page resource loading state
+  const [isPageReady, setIsPageReady] = useState(false);
+  const logoLoadedRef = useRef(false);
+  const logoErrorRef = useRef(false);
+  const logoImageRef = useRef<HTMLImageElement | null>(null);
+  
+  // Detect Chrome (exclude Edge)
+  const [isChrome, setIsChrome] = useState(false);
+  
   useEffect(() => {
-    const updateTimeTheme = () => {
-      const now = new Date();
-      const hour = now.getHours();
-      
-      if (hour >= 6 && hour < 12) {
-        setTimeTheme('morning'); // 暖阳色调
-      } else if (hour >= 12 && hour < 15) {
-        setTimeTheme('noon'); // 绿色调
-      } else if (hour >= 15 && hour < 18) {
-        setTimeTheme('afternoon'); // 蓝调
-      } else if (hour >= 18 && hour < 22) {
-        setTimeTheme('evening'); // 晚霞色调
-      } else {
-        setTimeTheme('night'); // 夜晚色调
-      }
-    };
-
-    updateTimeTheme();
-    const interval = setInterval(updateTimeTheme, 60000); // 每分钟更新一次
-
-    return () => clearInterval(interval);
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isChromeBrowser = /chrome/.test(userAgent) && !/edg/.test(userAgent);
+    setIsChrome(isChromeBrowser);
   }, []);
 
-  // 自动填充逻辑
-  React.useEffect(() => {
-    const remembered = localStorage.getItem('rememberMe');
-    if (remembered === 'true') {
-      const rememberedEmail = localStorage.getItem('rememberedEmail') || '';
-      const rememberedPassword = localStorage.getItem('rememberedPassword') || '';
-      form.setFieldsValue({
-        email: rememberedEmail,
-        password: rememberedPassword,
-        remember: true,
-      });
+  const isTotpComplete = useMemo(() => {
+    return totpCode && totpCode.length === 6;
+  }, [totpCode]);
+  
+  // Preload logo image
+  useEffect(() => {
+    const logoImg = new Image();
+    logoImg.src = '/favicon.svg';
+    
+    logoImg.onload = () => {
+      logoLoadedRef.current = true;
+      logoImageRef.current = logoImg;
+      // Wait one microtask so resources finish loading
+      setTimeout(() => {
+        setIsPageReady(true);
+      }, 0);
+    };
+    
+    logoImg.onerror = () => {
+      logoErrorRef.current = true;
+      // Show page even if logo fails (logo hidden)
+      setTimeout(() => {
+        setIsPageReady(true);
+      }, 0);
+    };
+    
+    // Timeout cap to avoid long resource waits
+    const timeout = setTimeout(() => {
+      if (!logoLoadedRef.current && !logoErrorRef.current) {
+        setIsPageReady(true);
+      }
+    }, 2000); // Max wait 2s
+    
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, []);
+
+  // Prevent Chrome autofill on page load
+  useEffect(() => {
+    // Set via requestAnimationFrame before paint
+    const rafId = requestAnimationFrame(() => {
+      const emailInput = document.getElementById('email') as HTMLInputElement;
+      const passwordInput = document.getElementById('password') as HTMLInputElement;
+      
+      if (emailInput) {
+        // Force autocomplete off
+        emailInput.setAttribute('autocomplete', 'off');
+        emailInput.setAttribute('data-lpignore', 'true'); // Ignore LastPass
+        emailInput.setAttribute('data-form-type', 'other'); // Block other password managers
+        emailInput.setAttribute('data-1p-ignore', 'true'); // Ignore 1Password
+      }
+      
+      if (passwordInput) {
+        // Use new-password to block autofill until user interacts
+        passwordInput.setAttribute('autocomplete', 'new-password');
+        passwordInput.setAttribute('data-lpignore', 'true');
+        passwordInput.setAttribute('data-form-type', 'other');
+        passwordInput.setAttribute('data-1p-ignore', 'true');
+      }
+    });
+    
+    return () => {
+      cancelAnimationFrame(rafId);
+    };
+  }, []); // Run once on mount
+
+  // Filter out Chinese characters and other non-ASCII characters (keep only ASCII letters, numbers, and common punctuation)
+  const filterNonASCII = (value: string): string => {
+    // Remove Chinese characters (Unicode range \u4e00-\u9fa5)
+    // Keep ASCII letters, numbers, and common punctuation: @ . _ - + ! # $ % & * ( ) [ ] { } | \ : ; " ' < > , ? / ~ ` ^
+    return value.replace(/[\u4e00-\u9fa5\u3400-\u4dbf\uf900-\ufaff]/g, '');
+  };
+  
+  // Email validation
+  const validateEmail = (email: string): boolean => {
+    if (!email) {
+      setEmailError('Enter email');
+      return false;
     }
-  }, [form]);
-
-  // 邮箱格式校验
-  const isEmailFormat = (email: string) => /^[\w-.]+@[\w-]+\.[a-zA-Z]{2,}$/.test(email);
-  // 是否包含@smartlead
-  const isSmartleadEmail = (email: string) => email.includes('@smartlead');
-  // 是否为有效邮箱
-  const isValidSmartleadEmail = (email: string) => isEmailFormat(email) && isSmartleadEmail(email);
-
-  const onFinish = async (values: LoginFormValues) => {
-    setLoading(true);
-    setLoginError('');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setEmailError('Invalid email format');
+      return false;
+    }
+    setEmailError('');
+    return true;
+  };
+  
+  // Password validation
+  const validatePassword = (password: string): boolean => {
+    if (!password) {
+      setPasswordError('Enter password');
+      return false;
+    }
+    if (password.length < 6) {
+      setPasswordError('Password too short');
+      return false;
+    }
+    setPasswordError('');
+    return true;
+  };
+  
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isComposing) {
+      const filteredValue = filterNonASCII(e.target.value);
+      setEmail(filteredValue);
+      if (emailError) {
+        validateEmail(filteredValue);
+      }
+    } else {
+      setEmail(e.target.value);
+    }
+  };
+  
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isComposing) {
+      const filteredValue = filterNonASCII(e.target.value);
+      setPassword(filteredValue);
+      if (passwordError) {
+        validatePassword(filteredValue);
+      }
+    } else {
+      setPassword(e.target.value);
+    }
+  };
+  
+  const handleCompositionStart = () => {
+    setIsComposing(true);
+  };
+  
+  const handleCompositionEnd = (e: React.CompositionEvent<HTMLInputElement>) => {
+    setIsComposing(false);
+    // Filter the final value after composition ends
+    const filteredValue = filterNonASCII(e.currentTarget.value);
+    if (e.currentTarget.id === 'email') {
+      setEmail(filteredValue);
+      if (emailError) {
+        validateEmail(filteredValue);
+      }
+    } else if (e.currentTarget.id === 'password') {
+      setPassword(filteredValue);
+      if (passwordError) {
+        validatePassword(filteredValue);
+      }
+    }
+  };
+  
+  const handleTotpChange = useCallback((value: string) => {
+    setTotpCode(value);
+  }, []);
+  
+  const handleLoginSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
+    
+    if (!isEmailValid || !isPasswordValid) {
+      return;
+    }
+    
+    setLoginLoading(true);
+    
     try {
-      console.log('开始登录请求');
-      const response = await axiosInstance.post<LoginResponse>('/api/auth/login', {
-        email: values.email,
-        password: values.password,
-      });
-
-      console.log('登录响应:', response.data);
-
-      if (response.status === 200 && response.data.token) {
-        const user = {
-          username: values.email.split('@')[0],
-          email: values.email,
-          role: response.data.user.role,
-          lastLogin: new Date().toISOString(),
-          id: response.data.user.id || values.email,
-          accountType: response.data.user.role,
-          accountId: response.data.user.id || values.email,
-          accountName: values.email.split('@')[0],
-          apiToken: response.data.user.apiToken,
-          appId: response.data.user.appId,
-          appName: response.data.user.appName,
-        };
-
-        const now = Date.now();
-        const token = response.data.token;
-
-        // 无论是否记住登录，都先保存到 localStorage
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('userProfile', JSON.stringify(user));
-        localStorage.setItem('loginTime', now.toString());
-        localStorage.setItem('token', token);
-
-        // 如果选择记住登录，则保存额外的信息
-        if (values.remember) {
-          localStorage.setItem('rememberMe', 'true');
-          localStorage.setItem('rememberedEmail', values.email);
-        } else {
-          localStorage.removeItem('rememberMe');
-          localStorage.removeItem('rememberedEmail');
+      const response = await axiosInstance.post('/api/auth/login', { email, password });
+      const data = response.data as any;
+      
+      // Check 2FA requirement before token check
+      if (data && (data.requires_2fa === true || data.requires_2fa === 'true')) {
+        console.log('2FA required, showing 2FA input:', data);
+          setTwoFactorData(data);
+          setShow2FA(true);
+          setLoginLoading(false);
+          return;
         }
-
-        // 清除 sessionStorage 中的数据
-          sessionStorage.removeItem('isLoggedIn');
-          sessionStorage.removeItem('userProfile');
-          sessionStorage.removeItem('loginTime');
-          sessionStorage.removeItem('token');
-
-        // 设置 axios 默认请求头
-        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
-        // 使用 AuthContext 的 login 方法
-        login(user);
-
-        message.success('登录成功');
-        navigate('/');
-      } else {
-        setLoginError(response.data.message || '登录失败');
-        return;
+        
+        // Normal login flow
+      if (response.status === 200) {
+        if (!data.token || !data.user) {
+          console.error('Login response missing token or user:', data);
+          message.error('Login failed. Invalid response from server.');
+          setLoginLoading(false);
+          return;
+        }
+        
+        const userData = {
+          id: data.user.id,
+          email: data.user.email,
+          role: data.user.role,
+          accountType: data.user.accountType || 'default',
+          accountId: data.user.accountId || data.user.id,
+          accountName: data.user.accountName || data.user.username || data.user.email
+        };
+        
+        try {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('userProfile', JSON.stringify(userData));
+          localStorage.setItem('loginTime', Date.now().toString());
+        localStorage.setItem('isLoggedIn', 'true');
+          
+          // Update AuthContext state
+          login(userData);
+          
+          // Navigate via React Router (no full reload)
+          navigate('/', { replace: true });
+        } catch (error) {
+          console.error('Login function execution failed:', error);
+          message.error('Login failed. Please try again.');
+          setLoginLoading(false);
+        }
+        } else {
+        const errorMsg = data?.message || data?.error || 'Login failed';
+        message.error(errorMsg);
+        setLoginLoading(false);
       }
     } catch (error: any) {
-      console.error('登录失败:', error);
-      if (error.response?.data?.message) {
-        setLoginError(error.response.data.message);
-      } else if (error.code === 'ERR_NETWORK') {
-        setLoginError('网络连接错误，请检查后端服务是否正常运行');
-      } else {
-        setLoginError('登录失败，请稍后重试');
-      }
-      return;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 清除登录错误提示
-  const handleLoginInputChange = () => {
-    if (loginError) setLoginError('');
-  };
-
-  // 找回密码表单提交
-  const handleRecovery = () => {
-    if (!isValidSmartleadEmail(recoveryEmail)) {
-      return;
-    }
-    setRecoveryError('');
-    const subject = encodeURIComponent('Password Reset Request');
-    const body = encodeURIComponent(`Hi, I need to reset my password. My account email is: ${recoveryEmail}`);
-    const mailtoUrl = `mailto:simon@smartlead.tech?subject=${subject}&body=${body}`;
-    window.location.href = mailtoUrl;
-  };
-
-  // 邮箱输入变化
-  const handleRecoveryEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setRecoveryEmail(value);
-    setRecoveryTouched(true);
-    if (!isEmailFormat(value)) {
-      setRecoveryError('Please check your email format.');
-    } else if (!isSmartleadEmail(value)) {
-      setRecoveryError('Email is not allowed.');
-    } else {
-      setRecoveryError('');
-    }
-  };
-
-  // 恢复到登录
-  const handleBackToLogin = () => {
-    setShowRecovery(false);
-    setRecoveryEmail('');
-    setRecoveryError('');
-    setRecoveryTouched(false);
-  };
-
-  return (
-    <LoginContainer timeTheme={timeTheme}>
-      {/* 激光雨效果 */}
-      <LaserBeam delay={0} left={5} timeTheme={timeTheme} />
-      <LaserBeam delay={1.5} left={15} timeTheme={timeTheme} />
-      <LaserBeam delay={3} left={25} timeTheme={timeTheme} />
-      <LaserBeam delay={0.5} left={35} timeTheme={timeTheme} />
-      <LaserBeam delay={2} left={45} timeTheme={timeTheme} />
-      <LaserBeam delay={3.5} left={55} timeTheme={timeTheme} />
-      <LaserBeam delay={1} left={65} timeTheme={timeTheme} />
-      <LaserBeam delay={2.5} left={75} timeTheme={timeTheme} />
-      <LaserBeam delay={0.8} left={85} timeTheme={timeTheme} />
-      <LaserBeam delay={1.8} left={95} timeTheme={timeTheme} />
+      console.error('Login exception:', error);
       
-      <LoginBox timeTheme={timeTheme}>
-        <Title>{showRecovery ? 'Get Password' : 'AF WORKBENCH LOGIN'}</Title>
-        {showRecovery ? (
-          <>
-            <BackLink onClick={handleBackToLogin}><ArrowLeftOutlined style={{marginRight: 6}} />Back to login</BackLink>
-            <FormContainer>
-              <Form layout="vertical">
-                <Form.Item
-                  name="recoveryEmail"
-                  label="Email"
-                  validateStatus={recoveryError && recoveryTouched ? 'error' : ''}
-                  help={recoveryError && recoveryTouched ? (
-                    <RecoveryError><MailOutlined /> {recoveryError}</RecoveryError>
-                  ) : null}
-                >
-                  <Input
-                    placeholder="Enter your email address"
-                    size="large"
-                    value={recoveryEmail}
-                    onChange={handleRecoveryEmailChange}
-                    onBlur={() => setRecoveryTouched(true)}
-                    autoFocus
-                  />
-                </Form.Item>
-                <RecoveryButton
-                  type="primary"
-                  disabled={!isValidSmartleadEmail(recoveryEmail)}
-                  onClick={handleRecovery}
-                  block
-                >
-                  Send
-                </RecoveryButton>
-              </Form>
-            </FormContainer>
-          </>
-        ) : (
-          <>
-            <FormContainer>
-              <Form
-                form={form}
-                name="login"
-                onFinish={onFinish}
-                autoComplete="off"
-                layout="vertical"
-              >
-                <Form.Item
-                  name="email"
-                  label="Email"
-                  validateStatus={loginError ? 'error' : ''}
-                  rules={[
-                    { required: true, message: 'Please enter your email address' },
-                    { type: 'email', message: 'Please enter a valid email address' }
-                  ]}
-                >
-                  <Input
-                    prefix={<UserOutlined />}
-                    placeholder="Enter your email address"
-                    size="large"
-                    onChange={handleLoginInputChange}
-                  />
-                </Form.Item>
+      // Handle axios error response
+      let errorMessage = 'Login failed. Please check your credentials and try again.';
+      let isAuthError = false;
+      
+      if (error.response) {
+        // Server returned error response
+        const status = error.response.status;
+        const data = error.response.data;
+        
+        if (status === 401) {
+          errorMessage = data?.message || 'Invalid email or password';
+          isAuthError = true;
+        } else if (status === 500) {
+          errorMessage = data?.message || 'Server error. Please try again later.';
+        } else {
+          errorMessage = data?.message || `Login failed (${status})`;
+        }
+      } else if (error.request) {
+        // Request sent but no response received
+        errorMessage = 'Network error. Please check your connection and try again.';
+      }
+      
+      message.error(errorMessage, undefined, isAuthError);
+      setLoginLoading(false);
+    }
+  };
 
-                <Form.Item
-                  name="password"
-                  label="Password"
-                  validateStatus={loginError ? 'error' : ''}
-                  rules={[
-                    { required: true, message: 'Please enter your password' },
-                    { min: 6, message: 'Password must be at least 6 characters' }
-                  ]}
-                >
-                  <Input.Password
-                    prefix={<LockOutlined />}
-                    placeholder="Enter password"
-                    size="large"
-                    onChange={handleLoginInputChange}
-                  />
-                </Form.Item>
+  const handleTwoFactorSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    if (!isTotpComplete) {
+      setButtonShake(true);
+      setTimeout(() => setButtonShake(false), 600);
+      return;
+    }
+    
+    if (!twoFactorData || !twoFactorData.temp_identifier) {
+      message.error('Invalid 2FA session. Please login again.');
+      setShow2FA(false);
+      setTwoFactorData(null);
+      return;
+    }
+    
+    setTwoFactorLoading(true);
+    try {
+      const response = await axiosInstance.post('/api/auth/2fa/verify', {
+        temp_identifier: twoFactorData.temp_identifier,
+        totp_code: totpCode
+      });
 
-                {loginError && (
-                  <div style={{ color: '#e53935', marginBottom: 16, fontSize: 15, display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <MailOutlined /> {loginError}
+      const data = response.data as any;
+        
+      if (response.status === 200) {
+        if (!data.token || !data.user) {
+          message.error('Verification failed. Please try again.');
+          setTwoFactorLoading(false);
+        return;
+      }
+        
+        const userData = {
+          id: data.user.id,
+          email: data.user.email,
+          role: data.user.role || 'Authenticated User',
+          accountType: data.user.accountType || 'default',
+          accountId: data.user.accountId || data.user.id,
+          accountName: data.user.accountName || data.user.username || data.user.email
+        };
+        
+                  try {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('userProfile', JSON.stringify(userData));
+            localStorage.setItem('loginTime', Date.now().toString());
+            localStorage.setItem('isLoggedIn', 'true');
+            
+          // Update AuthContext state
+          login(userData);
+            
+          // Navigate via React Router (no full reload)
+          navigate('/', { replace: true });
+          } catch (error) {
+          console.error('Login function execution failed:', error);
+          message.error('Login failed. Please try again.');
+            setTwoFactorLoading(false);
+          }
+      } else {
+        const errorMsg = data?.message || data?.error || 'Verification failed';
+        message.error(errorMsg);
+          setTwoFactorLoading(false);
+        }
+    } catch (error: any) {
+      console.error('2FA verification exception:', error);
+      
+      let errorMessage = 'Verification failed. Please check your code and try again.';
+      let isAuthError = false;
+      
+      if (error.response) {
+        const status = error.response.status;
+        const data = error.response.data;
+        
+        if (status === 401) {
+          errorMessage = data?.message || 'Invalid verification code';
+          isAuthError = true;
+        } else if (status === 500) {
+          errorMessage = data?.message || 'Server error. Please try again later.';
+        } else {
+          errorMessage = data?.message || `Verification failed (${status})`;
+        }
+      } else if (error.request) {
+        errorMessage = 'Network error. Please check your connection and try again.';
+      }
+      
+      message.error(errorMessage, undefined, isAuthError);
+      setTwoFactorLoading(false);
+      // Keep TOTP on verify failure for retry
+      // Re-login only when temp id expires
+      if (error.response?.status === 401 && 
+          (error.response?.data?.error?.includes('Temporary identifier') || 
+           error.response?.data?.error?.includes('invalid or expired'))) {
+        // Temp id expired; re-login required
+        setShow2FA(false);
+        setTwoFactorData(null);
+        setTotpCode('');
+        message.error('Session expired. Please login again.');
+      }
+      // Other errors keep TOTP for retry
+    }
+  };
+
+    // Show loading until page ready
+    if (!isPageReady) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-white" style={{ userSelect: 'none' }}>
+          <div className="flex flex-col items-center justify-center">
+            <div className="w-12 h-12 border-3 border-gray-300 border-t-black rounded-full animate-spin mb-4" />
+            <p className="text-sm text-gray-600">Loading...</p>
+          </div>
+        </div>
+      );
+    }
+    
+    return (
+    <div className={`min-h-screen flex items-center justify-center bg-white px-4 py-12 select-none ${isChrome ? 'chrome-browser' : ''}`} style={{ userSelect: 'none' }}>
+      <style>{`
+        .select-none * { user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; }
+        .select-none input, .select-none textarea { user-select: text !important; -webkit-user-select: text !important; -moz-user-select: text !important; -ms-user-select: text !important; }
+        .select-none input#email:-webkit-autofill, .select-none input#email:-webkit-autofill:hover, .select-none input#email:-webkit-autofill:focus, .select-none input#email:-webkit-autofill:active,
+        .select-none input#password:-webkit-autofill, .select-none input#password:-webkit-autofill:hover, .select-none input#password:-webkit-autofill:focus, .select-none input#password:-webkit-autofill:active,
+        .select-none input:-webkit-autofill, .select-none input:-webkit-autofill:hover, .select-none input:-webkit-autofill:focus, .select-none input:-webkit-autofill:active {
+          -webkit-box-shadow: 0 0 0 30px white inset !important; -webkit-text-fill-color: inherit !important; box-shadow: 0 0 0 30px white inset !important; transition: background-color 5000s ease-in-out 0s;
+          font-size: 0.875rem !important; zoom: 1 !important; -webkit-text-size-adjust: 100% !important; text-size-adjust: 100% !important;
+          -webkit-font-smoothing: antialiased !important; -moz-osx-font-smoothing: grayscale !important; line-height: 1.5 !important;
+        }
+        .chrome-browser #email, .chrome-browser #password, .chrome-browser input[type="email"], .chrome-browser input[type="password"],
+        .chrome-browser #email:hover, .chrome-browser #email:focus, .chrome-browser #email:active, .chrome-browser #email:focus-visible,
+        .chrome-browser #password:hover, .chrome-browser #password:focus, .chrome-browser #password:active, .chrome-browser #password:focus-visible {
+          font-size: 0.875rem !important; line-height: 1.5 !important; zoom: 1 !important; -webkit-text-size-adjust: 100% !important; text-size-adjust: 100% !important; font-family: inherit !important;
+        }
+        #email::placeholder, #password::placeholder {
+          font-size: 0.875rem !important;
+          line-height: 1.5 !important;
+        }
+        #email::-webkit-input-placeholder, #password::-webkit-input-placeholder {
+          font-size: 0.875rem !important;
+          line-height: 1.5 !important;
+        }
+        #email::-moz-placeholder, #password::-moz-placeholder {
+          font-size: 0.875rem !important;
+          line-height: 1.5 !important;
+        }
+        #email:-ms-input-placeholder, #password:-ms-input-placeholder {
+          font-size: 0.875rem !important;
+          line-height: 1.5 !important;
+        }
+        .chrome-browser #email::placeholder, .chrome-browser #password::placeholder {
+          font-size: 0.875rem !important; line-height: 1.5 !important; transform: translateY(-1px) !important;
+        }
+        .chrome-browser #email::-webkit-input-placeholder, .chrome-browser #password::-webkit-input-placeholder {
+          font-size: 0.875rem !important; line-height: 1.5 !important; transform: translateY(-1px) !important;
+        }
+        .chrome-browser #email::-moz-placeholder, .chrome-browser #password::-moz-placeholder {
+          font-size: 0.875rem !important; line-height: 1.5 !important; transform: translateY(-1px) !important;
+        }
+        .chrome-browser #email:-ms-input-placeholder, .chrome-browser #password:-ms-input-placeholder {
+          font-size: 0.875rem !important; line-height: 1.5 !important; transform: translateY(-1px) !important;
+        }
+      `}</style>
+      <div 
+        className="w-full max-w-md"
+        style={isChrome ? { 
+          zoom: 1.25
+        } : undefined}
+      >
+        <Card className="border-gray-200 shadow-none">
+          <CardHeader className="space-y-1 pb-4">
+            {/* Logo */}
+            <div className="flex justify-center mb-4" style={{ minHeight: '48px' }}>
+              {logoLoadedRef.current ? (
+                <img 
+                  src="/favicon.svg"
+                  alt="ADNEXUS Logo" 
+                  className="h-12 w-auto"
+                />
+              ) : null}
+            </div>
+            <CardTitle className="text-2xl font-semibold text-center">
+              {show2FA ? '2-Step Verification' : 'ADNEXUS LOGIN'}
+            </CardTitle>
+            {!show2FA && (
+              <CardDescription className="text-center text-gray-600">
+                Enter your email below to login to your account
+              </CardDescription>
+            )}
+            {show2FA && (
+              <CardAction className="justify-center pt-2">
+                    <Button
+                  variant="link"
+                  className="text-sm text-gray-600 hover:text-gray-900"
+                      onClick={async () => {
+                        setQrModalData({ loading: true });
+                        try {
+                          const response = await fetch('/api/auth/2fa/generate-qr', {
+                            method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              temp_identifier: twoFactorData.temp_identifier,
+                              email: twoFactorData.user.email
+                            })
+                          });
+                          
+                          const qrData = await response.json();
+                          if (response.ok && qrData.success) {
+                            setQrModalData(qrData);
+                          } else {
+                            setQrModalData({ error: true });
+                          }
+                        } catch (error) {
+                          setQrModalData({ error: true });
+                        }
+                      }}
+                    >
+                      {qrModalData ? 'Refresh QR Code' : 'Generate New QR Code'}
+                    </Button>
+              </CardAction>
+            )}
+          </CardHeader>
+          
+          <CardContent className="space-y-4">
+            {!show2FA ? (
+              <form onSubmit={handleLoginSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="alpha@example.com"
+                    value={email}
+                    onChange={handleEmailChange}
+                    onCompositionStart={handleCompositionStart}
+                    onCompositionEnd={handleCompositionEnd}
+                    onFocus={() => {
+                      // Enable autofill on input focus
+                      setEmailAutoComplete('username');
+                      // Sync DOM attributes
+                      const emailInput = document.getElementById('email') as HTMLInputElement;
+                      if (emailInput) {
+                        emailInput.setAttribute('autocomplete', 'username');
+                        emailInput.removeAttribute('data-lpignore');
+                        emailInput.removeAttribute('data-form-type');
+                        emailInput.removeAttribute('data-1p-ignore');
+                      }
+                    }}
+                    className={`h-11 ${emailError ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                    autoComplete={emailAutoComplete}
+                  />
+                  {emailError && (
+                    <p className="text-sm text-red-500">{emailError}</p>
+                  )}
                   </div>
-                )}
 
-                <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
-                  <Col>
-                    <Form.Item name="remember" valuePropName="checked" noStyle>
-                      <Checkbox style={{ fontSize: 15, color: '#2d2d2d' }}>Remember me</Checkbox>
-                    </Form.Item>
-                  </Col>
-                  <Col>
-                    <ForgotLink onClick={() => setShowRecovery(true)}>Forgot password?</ForgotLink>
-                  </Col>
-                </Row>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                    <button
+                      type="button"
+                      onClick={() => message.info('This feature is not available yet.')}
+                      className="text-sm text-gray-600 hover:text-gray-900 underline-offset-4 hover:underline bg-transparent border-none p-0 cursor-pointer font-inherit text-left"
+                    >
+                      Forgot your password?
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={handlePasswordChange}
+                      onCompositionStart={handleCompositionStart}
+                      onCompositionEnd={handleCompositionEnd}
+                      onFocus={() => {
+                        // Enable autofill on input focus
+                        setPasswordAutoComplete('current-password');
+                        // Sync DOM attributes
+                        const passwordInput = document.getElementById('password') as HTMLInputElement;
+                        if (passwordInput) {
+                          passwordInput.setAttribute('autocomplete', 'current-password');
+                          passwordInput.removeAttribute('data-lpignore');
+                          passwordInput.removeAttribute('data-form-type');
+                          passwordInput.removeAttribute('data-1p-ignore');
+                        }
+                      }}
+                      className={`h-11 pr-10 ${passwordError ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                      autoComplete={passwordAutoComplete}
+                      style={{ 
+                        paddingRight: '2.5rem'
+                      }}
+                    />
+                    {/* Hide browser default password reveal controls */}
+                    <style>{`
+                      #password::-ms-reveal,
+                      #password::-ms-clear {
+                        display: none;
+                      }
+                      #password::-webkit-credentials-auto-fill-button {
+                        display: none;
+                      }
+                    `}</style>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 text-gray-500 hover:text-gray-700 z-10"
+                      style={{
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        WebkitTransform: 'translateY(-50%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '20px',
+                        height: '20px',
+                        padding: 0,
+                        margin: 0,
+                        border: 'none',
+                        background: 'transparent',
+                        cursor: 'pointer'
+                      }}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? <EyeOffIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                    </button>
+                  </div>
+                  {passwordError && (
+                    <p className="text-sm text-red-500">{passwordError}</p>
+                  )}
+                </div>
 
-                <Form.Item>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    loading={loading}
-                    block
-                    size="large"
+                <Button
+                  type="submit"
+                  className="w-full h-11 bg-black text-white hover:bg-gray-900"
+                  disabled={loginLoading}
+                >
+                  {loginLoading ? 'Loading...' : 'Log In'}
+                </Button>
+              </form>
+            ) : (
+              <>
+                  {qrModalData && (
+                  <div className="text-center mb-6 p-5 bg-gray-50 rounded-lg border border-gray-200">
+                      {qrModalData.loading && (
+                      <div className="flex flex-col items-center justify-center min-h-[180px]">
+                        <div className="w-10 h-10 border-3 border-gray-300 border-t-black rounded-full animate-spin mb-4" />
+                        <p className="text-sm text-gray-600">Generating QR Code...</p>
+                </div>
+                      )}
+                      
+                      {qrModalData.error && (
+                      <div className="flex flex-col items-center justify-center min-h-[180px]">
+                        <div className="w-10 h-10 border-2 border-red-300 rounded-full flex items-center justify-center mb-4">
+                          <span className="text-red-500 text-xl">!</span>
+                </div>
+                        <p className="text-sm text-red-600 mb-2">Failed to generate QR Code</p>
+                          <Button
+                          variant="link"
+                            onClick={() => setQrModalData(null)}
+                          className="text-xs text-gray-600"
+                          >
+                            Try Again
+                          </Button>
+              </div>
+                      )}
+                      
+                      {qrModalData.qr_code && !qrModalData.loading && !qrModalData.error && (
+                        <>
+                          <img 
+                            src={qrModalData.qr_code} 
+                            alt="2FA QR Code" 
+                          className="max-w-[180px] mx-auto mb-4 rounded-lg shadow-md"
+                        />
+                        <p className="text-sm text-gray-600">
+                            Please scan this QR code with Google Authenticator
+                          </p>
+                        </>
+                      )}
+              </div>
+                  )}
+                  
+                <form onSubmit={handleTwoFactorSubmit} className="space-y-4">
+                  <div className="flex justify-center">
+                    <InputOTP
+                      maxLength={6}
+                      value={totpCode}
+                        onChange={handleTotpChange}
+                    >
+                      <InputOTPGroup>
+                        <InputOTPSlot index={0} />
+                        <InputOTPSlot index={1} />
+                        <InputOTPSlot index={2} />
+                      </InputOTPGroup>
+                      <InputOTPSeparator />
+                      <InputOTPGroup>
+                        <InputOTPSlot index={3} />
+                        <InputOTPSlot index={4} />
+                        <InputOTPSlot index={5} />
+                      </InputOTPGroup>
+                    </InputOTP>
+                  </div>
+
+                      <Button
+                    type="submit"
+                    className={`w-full h-11 bg-black text-white hover:bg-gray-900 ${buttonShake ? 'animate-pulse' : ''}`}
+                    disabled={!isTotpComplete || twoFactorLoading}
                   >
-                    Login
-                  </Button>
-                </Form.Item>
-              </Form>
-            </FormContainer>
-          </>
-        )}
-      </LoginBox>
-    </LoginContainer>
+                    {twoFactorLoading ? 'Verifying...' : 'Verify'}
+                      </Button>
+                </form>
+                </>
+              )}
+          </CardContent>
+          
+          {!show2FA && (
+            <CardFooter className="flex-col gap-2 pt-0">
+              <div className="text-sm text-center text-gray-600">
+                Don't have an account?{' '}
+                <Link
+                  to="/signup"
+                  className="text-blue-600 hover:underline bg-transparent border-none p-0 cursor-pointer font-medium"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            </CardFooter>
+          )}
+        </Card>
+      </div>
+    </div>
   );
 };
 

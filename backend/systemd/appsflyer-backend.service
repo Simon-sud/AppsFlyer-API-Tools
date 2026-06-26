@@ -1,0 +1,38 @@
+[Unit]
+Description=AppsFlyer Backend (Scraper + Python + AutoPipe)
+After=network.target mysql.service postgresql.service
+Wants=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+
+# Deploy path — adjust User, Group, WorkingDirectory, ExecStart to your server
+WorkingDirectory=/opt/appsflyer/backend
+ExecStart=/bin/bash start_services_optimized.sh
+
+# 使用 Go 1.21+（避免 systemd 下用到旧版 Go 导致 vendor/slices 编译失败）
+Environment="PATH=/usr/local/go/bin:/usr/bin:/bin:/usr/local/bin"
+
+# 环境变量：优先从文件读取（可选，避免密钥写进本文件）
+# 创建 /etc/appsflyer/backend.env 并 chmod 600，内容示例：
+#   JWT_SECRET_KEY=你的密钥
+#   DB_HOST=localhost
+#   DB_USER=root
+#   DB_PASSWORD=你的密码
+#   DB_NAME=appsflyer_rawdata
+EnvironmentFile=-/etc/appsflyer/backend.env
+
+# 若未使用 EnvironmentFile，可在此直接写（不推荐，密钥会明文）
+# Environment=JWT_SECRET_KEY=xxx DB_HOST=localhost DB_USER=root DB_PASSWORD=xxx DB_NAME=appsflyer_rawdata
+
+Restart=on-failure
+RestartSec=10
+# 使用 journal 避免 append 文件导致的 status 209/STDOUT；查看日志: journalctl -u appsflyer-backend -f
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=appsflyer-backend
+
+[Install]
+WantedBy=multi-user.target

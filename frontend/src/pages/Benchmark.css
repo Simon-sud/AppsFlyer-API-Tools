@@ -1,0 +1,637 @@
+/* Benchmark — filter / button / panel motion (aligned with AutoPipe select controls) */
+
+@keyframes benchmark-dropdown-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes benchmark-panel-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* --- Select trigger (Combobox / filters) --- */
+.benchmark-select-wrapper {
+  position: relative;
+}
+
+.benchmark-select-button {
+  width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.375rem;
+  background: #ffffff;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.25;
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-rendering: geometricPrecision;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.benchmark-select-button--default {
+  height: 40px;
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+.benchmark-select-button--compact {
+  height: 32px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.benchmark-select-button:hover:not(:disabled) {
+  border-color: #6b7280;
+}
+
+.benchmark-select-button:focus-visible {
+  outline: none;
+  border-color: #6b7280;
+  box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.12);
+}
+
+.benchmark-select-button.is-active {
+  border-color: #6b7280;
+  box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.12);
+}
+
+.benchmark-select-button:disabled {
+  cursor: not-allowed;
+  background: #f8fafc;
+  color: #94a3b8;
+  border-color: #e2e8f0;
+}
+
+.benchmark-select-arrow {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease;
+}
+
+/* Match AutoPipe .select-button > span:first-child — flex shell, ellipsis on inner text */
+.benchmark-select-button__label {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  line-height: 1.25;
+  padding-bottom: 1px;
+  margin: 0;
+  overflow: hidden;
+}
+
+.benchmark-select-button__label-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.25;
+}
+
+.benchmark-select-arrow.is-open {
+  transform: rotate(180deg);
+  color: #6b7280;
+}
+
+.benchmark-select-button--filter-fit {
+  width: auto;
+  min-width: 8.5rem;
+  max-width: 100%;
+}
+
+.benchmark-select-wrapper--filter-fit {
+  width: auto;
+  max-width: 100%;
+}
+
+/* App Estimator — filter min-width tracks search input; true vertical centering */
+.app-estimator-filter-row {
+  --app-estimator-control-min-width: 17.5rem;
+}
+
+.app-estimator-filter-row .benchmark-select-wrapper--filter-fit {
+  width: max-content;
+  min-width: min(var(--app-estimator-control-min-width), 100%);
+  max-width: min(100%, 22rem);
+}
+
+.app-estimator-filter-row .benchmark-select-button--filter-fit {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Dispatch Access pattern: border + height + line-height on the input itself (no wrapper/input split). */
+.app-estimator-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.app-estimator-search-input {
+  display: block;
+  width: 100%;
+  height: 2.5rem;
+  padding: 0 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  background: #ffffff;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 2.5rem;
+  color: #1e293b;
+  box-sizing: border-box;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.app-estimator-search-input::placeholder {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+.app-estimator-search-input:focus {
+  outline: none;
+  border-color: #94a3b8;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+/* --- Dropdown panel --- */
+.benchmark-select-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  z-index: 50;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition: opacity 0.24s ease, transform 0.24s ease;
+  transform-origin: top center;
+}
+
+.benchmark-select-dropdown.is-inline {
+  left: 0;
+  min-width: 100%;
+}
+
+.benchmark-select-dropdown.is-block {
+  left: 0;
+  right: 0;
+}
+
+.benchmark-select-dropdown.is-show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  animation: benchmark-dropdown-enter 0.22s ease-out;
+}
+
+.benchmark-select-dropdown .benchmark-select-dropdown__panel {
+  display: flex;
+  flex-direction: column;
+  height: auto !important;
+  max-height: min(320px, 70vh);
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.benchmark-select-dropdown__search {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0 12px;
+}
+
+.benchmark-select-dropdown__search-input {
+  flex: 1;
+  width: 100%;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  font-size: 14px;
+  line-height: 1.25;
+  color: #0f172a;
+  outline: none;
+}
+
+.benchmark-select-dropdown__search-input::placeholder {
+  color: #64748b;
+}
+
+.benchmark-select-dropdown__list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px;
+}
+
+.benchmark-select-dropdown__empty {
+  padding: 24px 12px;
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+}
+
+/* AppsFinder pattern: symmetric py + flex items-center on the same row that carries hover bg. */
+.benchmark-select-dropdown__option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 0.125rem;
+  background: transparent;
+  color: #0f172a;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.25rem;
+  cursor: pointer;
+  text-align: left;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+.benchmark-select-dropdown__option:hover,
+.benchmark-select-dropdown__option:focus-visible,
+.benchmark-select-dropdown__option.is-selected {
+  background-color: #f1f5f9;
+  outline: none;
+}
+
+.benchmark-select-dropdown__option--compact {
+  padding: 4px 8px;
+  font-size: 12px;
+  line-height: 1rem;
+}
+
+.benchmark-select-dropdown__option-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.benchmark-select-dropdown__option-check {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: #334155;
+}
+
+/* --- Action buttons --- */
+.benchmark-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 0.375rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.25;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-rendering: geometricPrecision;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+}
+
+.benchmark-btn--default {
+  height: 40px;
+  padding: 0 14px;
+}
+
+.benchmark-btn--sm {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 12px;
+}
+
+.benchmark-btn--compact {
+  height: 32px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.benchmark-btn:hover:not(:disabled) {
+  border-color: #6b7280;
+  background: #fafafa;
+}
+
+.benchmark-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.benchmark-btn:focus-visible {
+  outline: none;
+  border-color: #6b7280;
+  box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.12);
+}
+
+.benchmark-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+}
+
+.benchmark-btn__label {
+  display: flex;
+  align-items: center;
+  line-height: 1.25;
+  padding-bottom: 1px;
+}
+
+.benchmark-btn--primary {
+  background: #0f172a;
+  border-color: #0f172a;
+  color: #ffffff;
+}
+
+.benchmark-btn--primary:hover:not(:disabled) {
+  background: #1e293b;
+  border-color: #1e293b;
+}
+
+.benchmark-btn--ghost {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.benchmark-btn--ghost:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: transparent;
+}
+
+/* Segmented download control */
+.benchmark-segmented {
+  display: inline-flex;
+  overflow: hidden;
+  border-radius: 0.375rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.benchmark-segmented__btn {
+  display: inline-flex;
+  height: 32px;
+  align-items: center;
+  line-height: 1.25;
+  border: none;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.benchmark-segmented__btn:last-child {
+  border-right: none;
+}
+
+.benchmark-segmented__btn:hover:not(:disabled) {
+  background: #f5f5f5;
+}
+
+.benchmark-segmented__btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Tab chips (metric / section) */
+.benchmark-tab {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.25;
+  border-radius: 0.375rem;
+  border: 1px solid transparent;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.benchmark-tab--sm {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.benchmark-tab--md {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.benchmark-tab.is-active {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+}
+
+.benchmark-tab:not(.is-active):not(:disabled) {
+  color: #475569;
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+.benchmark-tab:not(.is-active):not(:disabled):hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.benchmark-tab:disabled {
+  cursor: not-allowed;
+  color: #94a3b8;
+}
+
+.benchmark-tab--section.is-active {
+  border-color: #0f172a;
+}
+
+.benchmark-tab--section:not(.is-active):not(:disabled) {
+  border-color: transparent;
+  background: transparent;
+}
+
+/* Animated panels (sections, progress card) */
+.benchmark-panel-motion {
+  opacity: 0;
+  transform: translateY(10px) scale(0.985);
+  transition:
+    opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+.benchmark-panel-motion.is-entering,
+.benchmark-panel-motion.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.benchmark-panel-motion.is-leaving {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  pointer-events: none;
+}
+
+.benchmark-panel-motion.is-visible {
+  animation: benchmark-panel-in 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Inline notice / progress strip */
+.benchmark-inline-card-motion {
+  opacity: 0;
+  transform: translateY(-6px) scale(0.99);
+  max-height: 0;
+  overflow: hidden;
+  transition:
+    opacity 0.24s ease,
+    transform 0.24s ease,
+    max-height 0.28s ease,
+    margin 0.28s ease,
+    padding 0.28s ease;
+  pointer-events: none;
+}
+
+.benchmark-inline-card-motion.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  max-height: 120px;
+  pointer-events: auto;
+}
+
+.benchmark-inline-card-motion.is-leaving {
+  opacity: 0;
+  transform: translateY(-4px) scale(0.99);
+  max-height: 0;
+}
+
+/* Header help popover */
+.benchmark-help-anchor {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.benchmark-help-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  cursor: help;
+  border-radius: 4px;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.benchmark-help-trigger:hover,
+.benchmark-help-trigger:focus-visible {
+  color: #6b7280;
+  background: transparent;
+  outline: none;
+}
+
+.benchmark-help-popover {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 8px);
+  z-index: 40;
+  width: 26rem;
+  max-width: 90vw;
+  padding: 12px;
+  border-radius: 0.375rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 12px;
+  line-height: 1.5;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transform: translateX(-50%) translateY(-8px) scale(0.95);
+  pointer-events: none;
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+  transform-origin: top center;
+}
+
+.benchmark-help-popover.is-show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+.benchmark-footer-disclaimer {
+  user-select: none;
+  -webkit-user-select: none;
+}

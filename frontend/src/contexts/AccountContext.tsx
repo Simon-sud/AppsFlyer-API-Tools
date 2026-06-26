@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { message } from 'antd';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { message } from '../components/ui/toast';
 import { useAuth } from './AuthContext';
 import { getAccountRefreshInterval } from '../utils/constants';
 import { axiosInstance } from '../services/api';
@@ -10,7 +10,12 @@ interface AccountConfig {
   account_type: 'PID' | 'PRT';
   is_default: boolean;
   api_token?: string;
-  validate?: any; // 兼容后端返回的 validate 字段
+  custom_icon?: string; // Custom icon field
+  validate?: any; // Backend validate field
+  /** Deduped event names from Raw Data sample after Verify (JSON string possible) */
+  account_event_types?: any;
+  /** Raw Data export column names after Verify (JSON string possible) */
+  account_message_fields?: any;
 }
 
 interface AccountContextType {
@@ -31,13 +36,35 @@ export const AccountProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [lastUpdateTime, setLastUpdateTime] = useState(0);
   const { currentUser } = useAuth();
 
-  // 缓存时间（5分钟）
+  // Cache TTL (5 minutes)
   const CACHE_DURATION = 5 * 60 * 1000;
 
-  // 使用user.id作为唯一标识
+  // user.id as cache key
   const userKey = currentUser?.id || '';
   const CACHE_KEY = `accountConfigs_${userKey}`;
   const CACHE_TIME_KEY = `accountConfigsTime_${userKey}`;
+
+  // Ref: cache cleanup done once
+  const cacheCleanedRef = useRef(false);
+  
+  // One-time purge of legacy token caches
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !cacheCleanedRef.current) {
+      // Remove accountConfigs_* keys (may contain tokens)
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('accountConfigs_')) {
+          keysToRemove.push(key);
+        }
+        if (key && key.startsWith('accountConfigsTime_')) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      cacheCleanedRef.current = true; // Mark cleaned
+    }
+  }, []); // Run once on mount
 
   const fetchAccountConfigs = useCallback(async (forceRefresh = false, silent = false) => {
     try {
@@ -49,12 +76,21 @@ export const AccountProvider: React.FC<{ children: React.ReactNode }> = ({ child
         return;
       }
 
-      // 检查本地缓存
+      // Check local cache
       const now = Date.now();
-      const cached = localStorage.getItem(CACHE_KEY);
-      const cachedTime = Number(localStorage.getItem(CACHE_TIME_KEY) || 0);
+      const cacheKey = `accountConfigs_${userKey}`;
+      const cacheTimeKey = `accountConfigsTime_${userKey}`;
+      const cached = localStorage.getItem(cacheKey);
+      const cachedTime = Number(localStorage.getItem(cacheTimeKey) || 0);
+      
       if (!forceRefresh && cached && now - cachedTime < CACHE_DURATION) {
-        setAccountConfigs(JSON.parse(cached));
+        const parsedCache = JSON.parse(cached);
+        // Strip token from cached data
+        const sanitizedCache = parsedCache.map((config: any) => {
+          const { api_token, ...rest } = config;
+          return rest;
+        });
+        setAccountConfigs(sanitizedCache);
         setLastUpdateTime(cachedTime);
         if (!silent) setLoading(false);
         return;
@@ -63,13 +99,19 @@ export const AccountProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setError(null);
 
       const response = await axiosInstance.get('/api/auth/account-configs');
+      
       if (response.status === 200) {
         const data = response.data as { configs?: AccountConfig[] };
-        setAccountConfigs(data.configs || []);
+        // Strip token from API data
+        const sanitizedConfigs = (data.configs || []).map((config: any) => {
+          const { api_token, ...rest } = config;
+          return rest;
+        });
+        setAccountConfigs(sanitizedConfigs);
         setLastUpdateTime(now);
-        // 写入本地缓存
-        localStorage.setItem(CACHE_KEY, JSON.stringify(data.configs || []));
-        localStorage.setItem(CACHE_TIME_KEY, String(now));
+        // Write cache without token
+        localStorage.setItem(cacheKey, JSON.stringify(sanitizedConfigs));
+        localStorage.setItem(cacheTimeKey, String(now));
       }
     } catch (err) {
       setAccountConfigs([]);
@@ -78,23 +120,58 @@ export const AccountProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       if (!silent) setLoading(false);
     }
-  }, [userKey]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userKey]); // CACHE_DURATION is constant
 
-  // 获取指定类型的账户配置
+  // Account configs by type
   const getAccountConfig = useCallback((accountType: string) => {
     return accountConfigs.find(config => config.account_type === accountType);
   }, [accountConfigs]);
 
-  // 账号切换时清空缓存并强制拉取
+  // Ref: avoid duplicate init fetch
+  const accountInitializedRef = useRef(false);
+  const lastAccountUserKeyRef = useRef<string>('');
+
+  // On account switch: clear cache and refetch
   useEffect(() => {
+    // Skip if userKey unchanged and initialized
+    if (userKey === lastAccountUserKeyRef.current && accountInitializedRef.current) {
+      return;
+    }
+
+    // Empty userKey: reset without fetch
+    if (!userKey) {
+      setAccountConfigs([]);
+      setLastUpdateTime(0);
+      accountInitializedRef.current = false;
+      lastAccountUserKeyRef.current = '';
+      return;
+    }
+
+    // Update ref
+    lastAccountUserKeyRef.current = userKey;
+    
     setAccountConfigs([]);
     setLastUpdateTime(0);
-    if (userKey) {
+    // Purge legacy token cache
+    const cacheKey = `accountConfigs_${userKey}`;
+    const cacheTimeKey = `accountConfigsTime_${userKey}`;
+    localStorage.removeItem(cacheKey);
+    localStorage.removeItem(cacheTimeKey);
+    
+    // Reset init flag
+    accountInitializedRef.current = false;
+    
+    // Defer to next tick to avoid init races
+    const timer = setTimeout(() => {
       fetchAccountConfigs(true);
-    }
-  }, [userKey, fetchAccountConfigs]);
+      accountInitializedRef.current = true; // Mark initialized
+    }, 0);
+    
+    return () => clearTimeout(timer);
+  }, [userKey, fetchAccountConfigs]); // fetchAccountConfigs dep; ref/setTimeout dedupes
 
-  // 定期刷新（周期可动态调整）
+  // Periodic refresh (interval configurable)
   useEffect(() => {
     if (!currentUser) return;
     let timer: NodeJS.Timeout | null = null;
@@ -102,11 +179,11 @@ export const AccountProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (timer) clearInterval(timer);
       const interval = getAccountRefreshInterval(userKey);
       timer = setInterval(() => {
-        fetchAccountConfigs(true, true); // 静默刷新
+        fetchAccountConfigs(true, true); // Silent refresh
       }, interval);
     }
     setupInterval();
-    // 监听设置变更事件
+    // Listen for settings changes
     function onRuleChanged() {
       setupInterval();
     }
@@ -117,25 +194,45 @@ export const AccountProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
   }, [currentUser, userKey, fetchAccountConfigs]);
 
-  // 退出登录时清空缓存
+  // Refetch account configs when Super Admin changes team
+  useEffect(() => {
+    const onSelectedTeamChanged = () => {
+      fetchAccountConfigs(true, true);
+    };
+    window.addEventListener('selected-team-changed', onSelectedTeamChanged);
+    return () => window.removeEventListener('selected-team-changed', onSelectedTeamChanged);
+  }, [fetchAccountConfigs]);
+
+  // Clear cache on logout
   useEffect(() => {
     if (!currentUser) {
       setAccountConfigs([]);
       setLastUpdateTime(0);
+      // Clear all user caches (legacy tokens)
+      if (userKey) {
+        const cacheKey = `accountConfigs_${userKey}`;
+        const cacheTimeKey = `accountConfigsTime_${userKey}`;
+        localStorage.removeItem(cacheKey);
+        localStorage.removeItem(cacheTimeKey);
+      }
       localStorage.removeItem(CACHE_KEY);
       localStorage.removeItem(CACHE_TIME_KEY);
     }
-  }, [currentUser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser, userKey]); // CACHE_KEY/CACHE_TIME_KEY derived from userKey
+
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = React.useMemo(() => ({
+    accountConfigs,
+    loading,
+    error,
+    refreshAccountConfigs: (silent = false) => fetchAccountConfigs(true, silent),
+    getAccountConfig,
+    lastUpdateTime
+  }), [accountConfigs, loading, error, getAccountConfig, lastUpdateTime, fetchAccountConfigs]);
 
   return (
-    <AccountContext.Provider value={{
-      accountConfigs,
-      loading,
-      error,
-      refreshAccountConfigs: (silent = false) => fetchAccountConfigs(true, silent),
-      getAccountConfig,
-      lastUpdateTime
-    }}>
+    <AccountContext.Provider value={contextValue}>
       {children}
     </AccountContext.Provider>
   );

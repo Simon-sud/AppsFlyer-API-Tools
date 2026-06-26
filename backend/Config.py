@@ -5,23 +5,24 @@ logger = logging.getLogger(__name__)
 
 def get_account(account_type=None, user_id=None):
     """
-    从数据库获取账户配置信息，支持user_id权限过滤
-    :param account_type: 账户类型（可选）
-    :param user_id: 当前用户ID（可选）
-    :return: 如果指定了账户类型，返回该类型的配置信息；否则返回所有账户类型的配置信息
+    Fetch account configuration from the database, with optional user_id filtering.
+
+    :param account_type: Account type (optional).
+    :param user_id: Current user ID (optional).
+    :return: Config for the given account type, or all account types if none specified.
     """
     try:
         with get_db_cursor() as cursor:
             if account_type:
                 if user_id:
-                    # 获取指定类型且当前用户可见的账户配置
+                    # Fetch account config for the type visible to the current user
                     cursor.execute("""
                         SELECT id, account_name, account_type, api_token, is_default 
                         FROM account_configs 
                         WHERE account_type = %s AND (user_ids IS NULL OR JSON_CONTAINS(user_ids, %s))
                     """, (account_type, f'"{user_id}"'))
                 else:
-                    # 兼容老逻辑
+                    # Legacy path without user_id filtering
                     cursor.execute("""
                         SELECT id, account_name, account_type, api_token, is_default 
                         FROM account_configs 
@@ -31,7 +32,7 @@ def get_account(account_type=None, user_id=None):
                 if not configs:
                     logger.warning(f"未找到账户类型为 {account_type} 的配置")
                     return None
-                # 返回第一个默认配置或第一个配置
+                # Return the default config, or the first match
                 for config in configs:
                     if config.get('is_default'):
                         return {
@@ -47,7 +48,7 @@ def get_account(account_type=None, user_id=None):
                     'api_token': configs[0]['api_token']
                 }
             else:
-                # 获取所有账户配置（可选：可加user_id过滤）
+                # Fetch all account configs (optional user_id filter may be added)
                 cursor.execute("""
                     SELECT id, account_name, account_type, api_token, is_default 
                     FROM account_configs

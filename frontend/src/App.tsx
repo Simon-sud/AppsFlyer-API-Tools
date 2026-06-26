@@ -1,76 +1,90 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { WORKBENCH_DOCS_PATH } from './docs/workbenchDocsNav';
 import Layout from './components/Layout';
-import Home from './pages/Home';
+import AppsflyerQuery from './pages/Home';
 import Dashboard from './pages/Dashboard';
+import AutoPipe from './pages/AutoPipe';
 import Account from './pages/Account';
+import DispatchAccess from './pages/DispatchAccess';
+import Doc from './pages/Doc';
 import Login from './pages/login';
-import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
-import ReportManagement from './pages/ReportManagement';
-import MindsDB from './pages/MindsDB';
+import Signup from './pages/signup';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AccountProvider, useAccount } from './contexts/AccountContext';
 import { UserProvider, useUser } from './contexts/UserContext';
 import LoadingSpinner from './components/LoadingSpinner';
 import AppsFinder from './pages/AppsFinder';
-import Settings from './pages/Settings';
+import Benchmark from './pages/Benchmark';
+import AppEstimator from './pages/AppEstimator';
+import { ToastContainer } from './components/ui/toast';
 
-const MAX_LOGIN_AGE = 1000 * 60 * 60 * 12; // 12小时
+const MAX_LOGIN_AGE = 1000 * 60 * 60 * 12; // 12 hours
+
+// Context wrapper component, handles the loading state of UserContext and AccountContext
+const ContextWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { loading: userLoading } = useUser();
+  const { loading: accountLoading } = useAccount();
+
+  // If the Context is still loading, display the loading status
+  if (userLoading || accountLoading) {
+    return <LoadingSpinner text="Loading User Information" />;
+  }
+
+  return <>{children}</>;
+};
 
 const App: React.FC = () => {
   return (
-    <LanguageProvider>
-      <AppWithLanguage />
-    </LanguageProvider>
-  );
-};
-
-const AppWithLanguage: React.FC = () => {
-  const { language } = useLanguage();
-  
-  return (
-    <AuthProvider language={language}>
-      <UserProvider>
-        <AccountProvider>
-          <Router>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route
-                path="/*"
-                element={
-                  <PrivateRoute>
-                    <Layout>
-                      <Routes>
-                        <Route path="/" element={<Home />} />
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/reports" element={<ReportManagement />} />
-                        <Route path="/account" element={<Account />} />
-                        <Route path="/mindsdb" element={<MindsDB />} />
-                        <Route path="/apps" element={<AppsFinder />} />
-                        <Route path="/settings" element={<Settings />} />
-                      </Routes>
-                    </Layout>
-                  </PrivateRoute>
-                }
-              />
-            </Routes>
-          </Router>
-        </AccountProvider>
-      </UserProvider>
+    <AuthProvider language="en">
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route
+            path="/*"
+            element={
+              <PrivateRoute>
+                <UserProvider>
+                  <AccountProvider>
+                    <ContextWrapper>
+                      <Layout>
+                        <Routes>
+                          <Route path="/" element={<AppsflyerQuery />} />
+                          <Route path="/dashboard" element={<Dashboard />} />
+                          <Route path="/autopipe" element={<AutoPipe />} />
+                          <Route path="/dispatch-access" element={<DispatchAccess />} />
+                          <Route path={WORKBENCH_DOCS_PATH} element={<Doc />} />
+                          <Route
+                            path="/docs/dispatch-access-center"
+                            element={<Navigate to={WORKBENCH_DOCS_PATH} replace />}
+                          />
+                          <Route path="/account" element={<Account />} />
+                          <Route path="/apps" element={<AppsFinder />} />
+                          <Route path="/benchmark" element={<Benchmark />} />
+                          <Route path="/app-estimator" element={<AppEstimator />} />
+                        </Routes>
+                      </Layout>
+                    </ContextWrapper>
+                  </AccountProvider>
+                </UserProvider>
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+      </Router>
+      <ToastContainer />
     </AuthProvider>
   );
 };
 
-// 私有路由组件
+// private routing component
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, currentUser, isLoading, isVerifying } = useAuth();
-  const { loading: userLoading } = useUser();
-  const { loading: accountLoading } = useAccount();
   const [isInitializing, setIsInitializing] = useState(true);
-  const { language } = useLanguage();
 
   useEffect(() => {
-    // 给一个短暂的延迟，确保 AuthContext 完全初始化
+    // Give a short delay to ensure the AuthContext is fully initialized
     const timer = setTimeout(() => {
       setIsInitializing(false);
     }, 100);
@@ -78,17 +92,17 @@ const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     return () => clearTimeout(timer);
   }, []);
 
-  // 在验证过程中显示加载状态
-  if (isLoading || isVerifying || isInitializing || userLoading || accountLoading) {
-    return <LoadingSpinner text={language === 'zh' ? '正在验证登录状态' : 'Verifying Login Status'} />;
+  // Show loading status during verification
+  if (isLoading || isVerifying || isInitializing) {
+    return <LoadingSpinner text="Verifying Login Status" />;
   }
 
-  // 检查本地存储中的 token 和登录时间
+  // Check token and login time in local storage
   const token = localStorage.getItem('token');
   const userProfile = localStorage.getItem('userProfile');
   const loginTime = localStorage.getItem('loginTime');
 
-  // 如果有 token、用户信息和登录时间，且登录时间未过期
+  // If there is token, user information and login time, and the login time has not expired
   if (token && userProfile && loginTime) {
     const loginTimestamp = parseInt(loginTime, 10);
     const now = Date.now();
@@ -99,9 +113,9 @@ const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     }
   }
 
-  // 只有在确认未认证时才重定向到登录页面
+  // Redirect to login page only if unauthenticated is confirmed
   if (!isAuthenticated || !currentUser) {
-    console.log('未认证状态，重定向到登录页面');
+    console.log('Unauthenticated, redirecting to login page');
     return <Navigate to="/login" replace />;
   }
 

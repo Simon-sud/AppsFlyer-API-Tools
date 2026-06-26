@@ -1,0 +1,1321 @@
+/* Loading animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Skeleton animation */
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+/* Skeleton base styles */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0px,
+    #f8f8f8 40px,
+    #f0f0f0 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+/* Skeleton task card */
+.task-card-skeleton {
+  background: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 10px rgba(17, 12, 46, 0.05);
+  border: 1px solid rgba(230, 233, 240, 0.6);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.skeleton-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.skeleton-account-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.skeleton-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+}
+
+.skeleton-account-name {
+  width: 120px;
+  height: 20px;
+}
+
+.skeleton-status {
+  width: 80px;
+  height: 24px;
+  border-radius: 12px;
+}
+
+.skeleton-tags {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.skeleton-tag {
+  width: 100px;
+  height: 24px;
+  border-radius: 12px;
+}
+
+.skeleton-task-id {
+  width: 140px;
+  height: 16px;
+  border-radius: 4px;
+}
+
+.skeleton-progress {
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
+
+.skeleton-progress-bar {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+.skeleton-progress-text {
+  width: 60px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+.skeleton-apps {
+  margin-top: 12px;
+}
+
+.skeleton-app-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.skeleton-app-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+}
+
+.skeleton-app-info {
+  flex: 1;
+}
+
+.skeleton-app-name {
+  width: 120px;
+  height: 16px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+.skeleton-app-progress {
+  width: 80px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+/* Auto Pipe page styles — no Ant Design dependency */
+
+/* Search bar container — Tailwind style */
+.auto-pipe-search-container {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 0.5rem; /* rounded-lg */
+  box-shadow: 0 2px 10px rgba(17, 12, 46, 0.05);
+  border: 1px solid rgba(230, 233, 240, 0.6);
+  padding: 0.75rem 1.25rem; /* reduced vertical padding */
+  margin-bottom: 1.5rem; /* mb-6 */
+  font-family: "Museo Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+  box-sizing: border-box;
+  overflow: visible; /* visible — allow content to display */
+  position: relative; /* establish positioning context */
+  min-height: 0; /* allow flex children to shrink */
+}
+
+/* Stats section */
+.stats-section {
+  border-top: none;
+  padding-top: 12px; /* reduced top spacing */
+  display: flex;
+  justify-content: flex-start;
+  gap: 1.5rem; /* gap between items */
+  align-items: flex-start;
+  width: 100%; /* full width */
+  min-height: 240px; /* min-height aligned with chart */
+  position: relative; /* establish positioning context */
+  box-sizing: border-box; /* correct box model */
+}
+
+/* Unified stats container — Tailwind style */
+.stats-unified-container {
+  background: #ffffff;
+  border-radius: 0.5rem; /* rounded-lg */
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 0;
+  width: 33.33%;
+  max-width: 300px;
+  min-width: 200px; /* min width */
+  align-self: flex-start;
+  flex-shrink: 0; /* prevent shrink */
+  box-sizing: border-box; /* correct box model */
+}
+
+
+/* Stat row styles */
+.stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  min-height: 60px; /* 60px rows × 4 = 240px, aligned with chart */
+  transition: background-color 0.2s ease;
+}
+
+.stat-row:first-child {
+  border-top-left-radius: 0.5rem; /* rounded-t-lg */
+  border-top-right-radius: 0.5rem;
+}
+
+.stat-row:last-child {
+  border-bottom: none;
+  border-bottom-left-radius: 0.5rem; /* rounded-b-lg */
+  border-bottom-right-radius: 0.5rem;
+}
+
+.stat-row:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* Minimal icons — no background */
+.stat-icon-simple {
+  font-size: 16px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  stroke-width: 1.5;
+  flex-shrink: 0;
+}
+
+.stat-icon-simple.running {
+  color: #6b46c1;
+}
+
+.stat-icon-simple.paused {
+  color: #dc2626;
+}
+
+.stat-icon-simple.completed {
+  color: #16a34a;
+}
+
+.stat-icon-simple.warning {
+  color: #f59e0b; /* orange */
+}
+
+.stat-icon-simple.failed {
+  color: #ea580c;
+}
+
+.stat-content {
+  flex: 1;
+  margin-left: 12px;
+}
+
+.stat-title {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: normal;
+  line-height: 1;
+  margin: 0;
+}
+
+.stat-value.running {
+  color: #6b46c1;
+}
+
+.stat-value.paused {
+  color: #dc2626;
+}
+
+.stat-value.completed {
+  color: #16a34a;
+}
+
+.stat-value.warning {
+  color: #f59e0b; /* orange */
+}
+
+.stat-value.failed {
+  color: #ea580c;
+}
+
+/* Search input styles */
+.search-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.search-input {
+  width: 100%;
+  height: 32px; /* reduced height */
+  padding: 0 12px 0 36px; /* reduced padding */
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.375rem; /* rounded-md */
+  font-size: 13px; /* slightly smaller font */
+  color: #333;
+  background: #ffffff;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+}
+
+.search-input::placeholder {
+  color: #999;
+}
+
+.search-input-icon {
+  position: absolute;
+  left: 10px; /* adjusted position */
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-size: 14px; /* smaller icon */
+  pointer-events: none;
+}
+
+/* Dropdown selector styles */
+.select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.select-button {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px 0 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.375rem; /* rounded-md */
+  font-size: 14px;
+  color: #333;
+  background: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+  gap: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.25;
+  letter-spacing: 0;
+  text-rendering: geometricPrecision;
+  font-variant-numeric: normal;
+  font-feature-settings: normal;
+  font-kerning: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  box-sizing: border-box;
+  will-change: auto;
+}
+
+.select-button:hover {
+  border-color: #6b7280; /* gray-500 */
+}
+
+.select-button:focus {
+  outline: none;
+  border-color: #6b7280; /* gray-500 */
+  box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.1);
+}
+
+.select-button.active {
+  border-color: #6b7280; /* gray-500 */
+  box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.1);
+}
+
+.select-arrow {
+  color: #999;
+  font-size: 12px;
+  transition: all 0.5s ease;
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(0deg) scale(1);
+}
+
+.select-arrow.open {
+  transform: rotate(180deg) scale(1.1);
+  color: #6b7280; /* gray-500 */
+}
+
+/* Filter button label styles */
+.select-button > span:first-child {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  line-height: 1.25;
+  padding-bottom: 1px;
+  overflow: hidden;
+}
+
+/* Dropdown menu styles */
+.select-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.375rem; /* rounded-md */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1100;
+  margin-top: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  
+  /* animation */
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+  max-height: 0;
+  transition: opacity 0.24s ease, transform 0.24s ease, max-height 0.24s ease;
+  pointer-events: none;
+}
+
+@keyframes select-dropdown-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Dropdown scrollbar — matches Home filter card */
+.select-dropdown::-webkit-scrollbar {
+  width: 4px;
+}
+
+.select-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.select-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+}
+
+.select-dropdown::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+  width: 4px;
+}
+
+/* Time picker scrollbar — matches Account card */
+.time-picker-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.time-picker-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.time-picker-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+}
+
+.time-picker-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+  width: 4px;
+}
+
+/* App selector scrollbar — matches account filter */
+.app-selector-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.app-selector-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-selector-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+}
+
+.app-selector-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+  width: 4px;
+}
+
+/* Dropdown expanded state */
+.select-dropdown.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  max-height: 200px;
+  pointer-events: auto;
+  animation: select-dropdown-enter 0.22s ease-out;
+}
+
+
+.select-option {
+  padding: 6px 12px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  transform: translateX(0);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+/* Dropdown left accent bar on container */
+.select-dropdown::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: #6b7280; /* gray-500 */
+  transition: width 0.25s ease;
+  z-index: 1;
+  pointer-events: none;
+  /* vertical bar spans full container height */
+  height: 100%;
+  min-height: 100%;
+}
+
+.select-option:last-child {
+  border-bottom: none;
+}
+
+
+.select-option:hover {
+  background-color: #f5f5f5;
+  transform: translateX(4px);
+  padding-left: 16px;
+}
+
+/* Show left accent when option is hovered */
+.select-dropdown:hover::before {
+  width: 4px;
+}
+
+/* Account filter — no purple fill or slide animation */
+.account-filter-wrapper .select-dropdown::before {
+  display: none;
+}
+
+.account-filter-wrapper .select-dropdown:hover::before {
+  display: none;
+}
+
+.account-filter-wrapper .select-option:hover {
+  background-color: #f5f5f5;
+  transform: none;
+  padding-left: 12px;
+}
+
+.select-option.selected {
+  background-color: #f3f4f6; /* gray-100 background */
+  color: #374151; /* gray-700 text */
+}
+
+/* Option icon styles */
+.option-icon {
+  color: #666;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+/* AutoPipe account option styles */
+.account-option-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.account-option-logo {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.account-option-logo-placeholder {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.account-option-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.account-option-name {
+  font-size: 11px;
+  font-weight: 500;
+  color: #262626;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  line-height: 1.1;
+}
+
+.account-option-type {
+  font-size: 9px;
+  font-weight: 400;
+  color: rgba(38, 38, 38, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  line-height: 1.1;
+  margin-top: 1px;
+}
+
+/* Button group styles */
+.button-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.action-button {
+  height: 40px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 0.375rem; /* rounded-md */
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+}
+
+.primary-button {
+  background: #000000; /* black */
+  color: #ffffff;
+  /* Shared 2px border slot with empty-state highlight — prevents layout shift */
+  border: 2px solid transparent;
+  box-sizing: border-box;
+}
+
+.primary-button:hover {
+  background: #161616;
+  transform: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+/* Empty-state New Task: border pulse only (no box-shadow spill) */
+@keyframes new-task-breathing-glow {
+  0%, 100% {
+    border-color: rgba(114, 46, 209, 0.42);
+  }
+  50% {
+    border-color: rgba(114, 46, 209, 0.95);
+  }
+}
+
+.action-button.primary-button.new-task-empty-highlight {
+  border-style: solid;
+  border-width: 2px;
+  animation: new-task-breathing-glow 2s ease-in-out infinite;
+}
+
+.secondary-button {
+  background: #ffffff;
+  color: #333;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.secondary-button:hover {
+  background: #f5f5f5; /* gray-100 */
+  border-color: #d9d9d9; /* gray-300 */
+}
+
+/* Button icons */
+.button-icon {
+  font-size: 14px;
+}
+
+/* Create / Create&Active buttons — prevent flicker on state change */
+.create-button,
+.create-active-button {
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  transform: translateZ(0); /* GPU acceleration */
+}
+
+.create-active-button {
+  background-color: #111111;
+  cursor: pointer;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.create-active-button:hover:not(:disabled) {
+  background-color: #000000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+}
+
+.create-active-button:disabled {
+  background-color: #d1d5db;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.app-selector-confirm-button {
+  background-color: #111827;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.app-selector-confirm-button:hover:not(:disabled) {
+  background-color: #000000;
+}
+
+.app-selector-confirm-button:disabled {
+  background-color: #d1d5db;
+  cursor: not-allowed;
+}
+
+
+/* Task card grid */
+.tasks-grid {
+  display: grid;
+  /* Fixed desktop columns — avoid 4→5 when sidebar collapses */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  /* Keep children in sync during container animation */
+  position: relative;
+  backface-visibility: hidden;
+}
+
+/* Break columns early — protect card layout before squeeze */
+@media (max-width: 1680px) {
+  .tasks-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1320px) {
+  .tasks-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  .tasks-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Task card — Tailwind style */
+.task-card {
+  background: #ffffff;
+  border-radius: 0.5rem; /* rounded-lg */
+  box-shadow: 0 2px 10px rgba(17, 12, 46, 0.05);
+  border: 1px solid rgba(230, 233, 240, 0.6);
+  padding: 1.25rem; /* p-5 */
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  /* Performance and stability */
+  will-change: box-shadow;
+  backface-visibility: hidden;
+  transform: translateZ(0); /* GPU acceleration; no hover shift */
+  /* Stable state after animation */
+  opacity: 1;
+  position: relative; /* stable positioning context */
+}
+
+/* Subtle hover — shadow/border only, no movement */
+.task-card:hover {
+  box-shadow: 0 2px 12px rgba(17, 12, 46, 0.08);
+  border-color: rgba(230, 233, 240, 0.9);
+  /* no transform — avoids page zoom conflicts */
+}
+
+/* Task card header */
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.task-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1890ff;
+  margin: 0;
+  flex: 1;
+}
+
+.task-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 0.25rem; /* rounded */
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.task-status.running {
+  color: #6b46c1;
+}
+
+.task-status.completed {
+  color: #16a34a;
+}
+
+.task-status.failed {
+  color: #ea580c;
+}
+
+.task-status.warning {
+  color: #f59e0b; /* orange */
+}
+
+.task-status.paused {
+  color: #dc2626;
+}
+
+.task-description {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+/* Task tags */
+.task-tags {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.task-tag {
+  padding: 4px 8px;
+  border-radius: 0.25rem; /* rounded */
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.task-tag.high {
+  background: #fff2f0;
+  color: #ff4d4f;
+}
+
+.task-tag.medium {
+  background: #fffbe6;
+  color: #faad14;
+}
+
+.task-tag.low {
+  background: #f6ffed;
+  color: #52c41a;
+}
+
+.task-tag.type {
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Progress bar */
+.progress-container {
+  margin-bottom: 16px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #f5f5f5; /* gray-100 */
+  border-radius: 0.25rem; /* rounded */
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #6b46c1; /* purple-600 */
+  border-radius: 0.25rem; /* rounded */
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.progress-fill.running {
+  background: #6b46c1;
+}
+
+.progress-fill.completed {
+  background: #16a34a;
+}
+
+.progress-fill.failed {
+  background: #ea580c;
+}
+
+.progress-fill.warning {
+  background: #ea580c;
+}
+
+.progress-fill.paused {
+  background: #dc2626;
+}
+
+/* Task apps container — fixed height for consistent divider */
+.task-apps {
+  height: 132px; /* fixed height — divider aligned for 1 or 2 apps */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* apps stacked from top */
+}
+
+/* Divider */
+.task-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.05);
+  margin: 16px 0;
+  border: none;
+}
+
+/* Task info section */
+.task-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* flex-start for top alignment */
+  margin-top: auto;
+  min-height: 72px; /* min-height matches right buttons (3×20px + 2×6px gap = 72px) */
+}
+
+.task-time-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px; /* row gap aligned with right buttons */
+  justify-content: flex-start; /* top-aligned */
+}
+
+.task-time {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5; /* line-height aligned with buttons */
+  display: flex;
+  align-items: center;
+  min-height: 20px; /* height aligned with buttons */
+}
+
+/* Latest Update row */
+.task-latest-update {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5; /* line-height aligned with buttons */
+  display: flex;
+  align-items: center;
+  min-height: 20px; /* height aligned with buttons */
+}
+
+.task-duration {
+  font-size: 12px;
+  color: #666; /* match color above */
+  margin: 0; /* no margin; spacing via gap */
+  line-height: 1.5; /* line-height aligned with buttons */
+  min-height: 20px; /* height aligned with buttons */
+}
+
+/* Task action buttons */
+.task-actions {
+  display: flex;
+  flex-direction: column; /* vertical stack */
+  gap: 8px;
+  flex-shrink: 0;
+  align-items: flex-end; /* right-aligned */
+  justify-content: flex-start; /* top-aligned with left three rows */
+}
+
+.task-action-button {
+  padding: 6px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.375rem; /* rounded-md */
+  background: #ffffff;
+  color: #333;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.task-action-button:hover {
+  background: #f5f5f5;
+  border-color: #d9d9d9;
+}
+
+.task-action-button.primary {
+  background: #1890ff;
+  color: #ffffff;
+  border-color: #1890ff;
+}
+
+.task-action-button.primary:hover {
+  background: #40a9ff;
+  border-color: #40a9ff;
+}
+
+.task-action-button.danger {
+  background: #ff4d4f;
+  color: #ffffff;
+  border-color: #ff4d4f;
+}
+
+.task-action-button.danger:hover {
+  background: #ff7875;
+  border-color: #ff7875;
+}
+
+/* Task card action bar */
+.task-card-actions {
+  display: flex;
+  justify-content: space-around;
+  padding: 12px 0 0 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  margin-top: 16px;
+}
+
+.task-card-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  border-radius: 0.375rem; /* rounded-md */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #666;
+  font-size: 12px;
+}
+
+.task-card-action:hover {
+  background: #f5f5f5;
+  color: #1890ff;
+}
+
+.task-card-action-icon {
+  font-size: 16px;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+}
+
+.empty-icon {
+  font-size: 48px;
+  color: #4a4a4a;
+  margin-bottom: 16px;
+}
+
+.empty-title {
+  font-size: 16px;
+  color: #4a4a4a;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.empty-description {
+  font-size: 14px;
+  color: #999;
+}
+
+/* Date picker popover card */
+.react-datepicker {
+  border: none !important;
+  border-radius: 2px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  font-family: inherit !important;
+  background: #fff !important;
+}
+
+.react-datepicker__header {
+  background: #fff !important;
+  border-bottom: 1px solid rgba(230, 233, 240, 0.6) !important;
+  border-radius: 2px 2px 0 0 !important;
+  padding: 16px !important;
+}
+
+.react-datepicker__header--custom {
+  background: #fff !important;
+}
+
+/* Today button */
+.react-datepicker__header .css-etl3pd {
+  background: #126AEC !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 2px !important;
+  padding: 6px 12px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.react-datepicker__header .css-etl3pd:hover {
+  background: #0050d6 !important;
+}
+
+/* Month and year picker */
+.react-datepicker__header .css-69i1ev {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-top: 12px !important;
+}
+
+.react-datepicker__header .css-1i0udw {
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  padding: 4px !important;
+  border-radius: 2px !important;
+  transition: all 0.2s ease !important;
+}
+
+.react-datepicker__header .css-1i0udw:hover {
+  background: rgba(18, 106, 236, 0.1) !important;
+}
+
+/* Month and year dropdown */
+.react-datepicker__header .css-9sgmt8,
+.react-datepicker__header .css-1kgifon {
+  background: #fff !important;
+  border: 1px solid rgba(230, 233, 240, 0.8) !important;
+  border-radius: 2px !important;
+  padding: 4px 8px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.react-datepicker__header .css-9sgmt8:hover,
+.react-datepicker__header .css-1kgifon:hover {
+  border-color: rgba(18, 106, 236, 0.3) !important;
+  box-shadow: 0 2px 8px rgba(18, 106, 236, 0.12) !important;
+}
+
+/* Weekday headers */
+.react-datepicker__day-names {
+  display: flex !important;
+  background: #f8f9fa !important;
+  border-bottom: 1px solid rgba(230, 233, 240, 0.6) !important;
+}
+
+.react-datepicker__day-name {
+  flex: 1 !important;
+  text-align: center !important;
+  padding: 8px 0 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #666 !important;
+  text-transform: uppercase !important;
+}
+
+/* Date grid */
+.react-datepicker__month {
+  padding: 8px !important;
+}
+
+.react-datepicker__week {
+  display: flex !important;
+}
+
+.react-datepicker__day {
+  flex: 1 !important;
+  text-align: center !important;
+  padding: 8px 4px !important;
+  font-size: 14px !important;
+  color: #333 !important;
+  cursor: pointer !important;
+  border-radius: 2px !important;
+  transition: all 0.2s ease !important;
+  margin: 1px !important;
+}
+
+.react-datepicker__day:hover {
+  background: rgba(18, 106, 236, 0.1) !important;
+  color: #126AEC !important;
+}
+
+.react-datepicker__day--selected {
+  background: #126AEC !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+.react-datepicker__day--selected:hover {
+  background: #0050d6 !important;
+}
+
+.react-datepicker__day--today {
+  background: rgba(18, 106, 236, 0.05) !important;
+  color: #126AEC !important;
+  font-weight: 600 !important;
+}
+
+.react-datepicker__day--today:hover {
+  background: rgba(18, 106, 236, 0.15) !important;
+}
+
+.react-datepicker__day--outside-month {
+  color: #ccc !important;
+}
+
+.react-datepicker__day--weekend {
+  color: #999 !important;
+}
+
+.react-datepicker__day--disabled {
+  color: #ccc !important;
+  cursor: not-allowed !important;
+}
+
+.react-datepicker__day--disabled:hover {
+  background: transparent !important;
+  color: #ccc !important;
+}
+
+/* Triangle indicator */
+.react-datepicker__triangle {
+  border-bottom-color: #fff !important;
+}
+
+.react-datepicker__triangle::before {
+  border-bottom-color: rgba(230, 233, 240, 0.6) !important;
+}
+
+/* Correct popover z-index */
+.react-datepicker-popper {
+  z-index: 1050 !important;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .react-datepicker {
+    font-size: 12px !important;
+  }
+  
+  .react-datepicker__day {
+    padding: 6px 2px !important;
+    font-size: 12px !important;
+  }
+  
+  .react-datepicker__day-name {
+    padding: 6px 0 !important;
+    font-size: 10px !important;
+  }
+}
+
+/* App selector dense dotted border — default gray */
+.app-selector-dotted-border {
+  border: 2px dotted;
+  border-spacing: 0;
+  border-color: rgb(209, 213, 219); /* gray-300 */
+}
+
+.app-selector-dotted-border:hover {
+  border-color: rgb(156, 163, 175); /* gray-400 */
+}
+

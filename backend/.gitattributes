@@ -1,0 +1,2 @@
+# Keep shell scripts LF (avoid CRLF after upload to Linux)
+*.sh text eol=lf

@@ -1,0 +1,401 @@
+/**
+ * Preview Data modal table — isolated from Query Results / global column-filter styles.
+ * Scoped to .preview-modal only
+ */
+
+/* ── Scroll container ── */
+.preview-modal .preview-datagrid-scroll {
+  overflow: auto;
+  max-height: 400px;
+  border: 1px solid #e6e9f0;
+  border-radius: 6px;
+  background: #fff;
+  width: 100%;
+  position: relative;
+  isolation: isolate;
+}
+
+.preview-modal .preview-datagrid-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.preview-modal .preview-datagrid-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.preview-modal .preview-datagrid-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+.preview-modal .preview-datagrid-scroll::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.preview-modal .preview-datagrid-scroll::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* ── Table base ── */
+.preview-modal .preview-datagrid-table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  table-layout: fixed;
+  width: max-content;
+  min-width: 0;
+  background: #fff;
+}
+
+.preview-modal .preview-datagrid-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #fafafa;
+}
+
+.preview-modal .preview-datagrid-th,
+.preview-modal .preview-datagrid-td {
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  border-bottom: 1px solid #f0f0f0;
+  border-right: 1px solid #f0f0f0;
+  font-family: "Museo Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: rgb(34, 13, 78);
+}
+
+/* ── Header ── */
+.preview-modal .preview-datagrid-th {
+  background: #fafafa;
+  font-weight: 600;
+  font-size: 13px;
+  text-align: center;
+  min-height: 38px;
+  padding: 10px 12px;
+  line-height: 1.3;
+  border-bottom: 1px solid #e6e9f0;
+  overflow: visible;
+}
+
+.preview-modal .preview-datagrid-th-inner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.preview-modal .preview-datagrid-th-label {
+  flex: 0 0 auto;
+}
+
+/* ── Data rows (readability: larger type, normal weight) ── */
+.preview-modal .preview-datagrid-td {
+  background: #fff;
+  font-size: 14px;
+  font-weight: 400;
+  text-align: left;
+  padding: 10px 12px;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+  pointer-events: none;
+}
+
+.preview-modal .preview-datagrid-row {
+  height: 42px;
+}
+
+.preview-modal .preview-datagrid-td pre.preview-json-value {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  max-height: 1.45em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Column filter trigger ── */
+.preview-modal .preview-col-filter {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  line-height: 0;
+}
+
+.preview-modal .preview-col-filter__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #e0e4ec;
+  border-radius: 6px;
+  background: #fff;
+  color: #5c5c7a;
+  cursor: pointer;
+  position: relative;
+  flex: 0 0 auto;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.12s ease;
+}
+
+.preview-modal .preview-col-filter__trigger svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.preview-modal .preview-col-filter__trigger:hover {
+  background: #f5f7ff;
+  border-color: #c5d4f5;
+  color: #1677ff;
+  box-shadow: 0 1px 3px rgba(22, 119, 255, 0.12);
+}
+
+.preview-modal .preview-col-filter__trigger:active {
+  transform: scale(0.96);
+}
+
+.preview-modal .preview-col-filter__trigger.is-open {
+  background: #e8f1ff;
+  border-color: #91b4f7;
+  color: #1677ff;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.15);
+}
+
+.preview-modal .preview-col-filter__trigger.has-selection {
+  border-color: #91b4f7;
+  color: #1677ff;
+}
+
+.preview-modal .preview-col-filter__badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: #1677ff;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Filter overlay (portal/fixed; avoids table overflow clipping) ── */
+.preview-col-filter__panel {
+  position: fixed;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  max-width: calc(100vw - 24px);
+  background: #fff;
+  border: 1px solid #e8ebf2;
+  border-radius: 10px;
+  box-shadow:
+    0 12px 32px rgba(34, 13, 78, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.05);
+  font-family: "Museo Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgb(34, 13, 78);
+  overflow: hidden;
+  pointer-events: auto;
+  contain: layout style;
+  animation: preview-col-filter-panel-in 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: top left;
+  will-change: transform, opacity;
+}
+
+@keyframes preview-col-filter-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.preview-col-filter__panel-header {
+  flex-shrink: 0;
+  min-height: 40px;
+  padding: 11px 14px;
+  border-bottom: 1px solid #f0f2f6;
+  font-size: 11px;
+  font-weight: 600;
+  color: #7a7f94;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: #fafbfc;
+}
+
+.preview-col-filter__panel-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 260px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(34, 13, 78, 0.18) transparent;
+}
+
+.preview-col-filter__panel-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.preview-col-filter__panel-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.preview-col-filter__panel-list::-webkit-scrollbar-thumb {
+  background: rgba(34, 13, 78, 0.16);
+  border-radius: 4px;
+}
+
+.preview-col-filter__option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 38px;
+  padding: 0 14px;
+  margin: 0;
+  cursor: pointer;
+  border-bottom: 1px solid #f4f5f8;
+  box-sizing: border-box;
+  transition: background-color 0.15s ease;
+  user-select: none;
+}
+
+.preview-col-filter__option:last-child {
+  border-bottom: none;
+}
+
+.preview-col-filter__option:hover {
+  background: #f8f9fc;
+}
+
+.preview-col-filter__option.is-selected {
+  background: #f4f6fa;
+}
+
+.preview-col-filter__option.is-selected:hover {
+  background: #eef1f6;
+}
+
+/* Custom checkbox: light selected state, stable size */
+.preview-col-filter__checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
+  margin: 0;
+  flex-shrink: 0;
+  border: 1px solid #d8dce6;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  position: relative;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.preview-col-filter__checkbox:hover {
+  border-color: #c5cde0;
+  background: #fafbfc;
+}
+
+.preview-col-filter__checkbox:checked {
+  background: #eef2f8;
+  border-color: #b8c6dc;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.85);
+}
+
+.preview-col-filter__checkbox:checked::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 4px;
+  height: 8px;
+  border: solid #7a94b8;
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+}
+
+.preview-col-filter__checkbox:focus-visible {
+  outline: 2px solid rgba(122, 148, 184, 0.35);
+  outline-offset: 2px;
+}
+
+.preview-col-filter__option-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: rgb(34, 13, 78);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview-col-filter__option.is-selected .preview-col-filter__option-label {
+  color: rgb(34, 13, 78);
+  font-weight: 500;
+}
+
+.preview-col-filter__option--all {
+  min-height: 40px;
+  font-weight: 500;
+  background: #fafbfc;
+  border-bottom: 1px solid #eceef3;
+}
+
+.preview-col-filter__option--all.is-selected {
+  background: #f2f4f8;
+}
+
+.preview-col-filter__option--all .preview-col-filter__option-label {
+  font-weight: 500;
+  color: #5c6278;
+}
+
+.preview-modal .preview-datagrid-th .preview-col-filter,
+.preview-modal .preview-datagrid-th .preview-col-filter__trigger {
+  pointer-events: auto;
+}

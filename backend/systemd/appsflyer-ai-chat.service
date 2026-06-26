@@ -1,0 +1,26 @@
+[Unit]
+Description=AppsFlyer AI Chat Service (Go, port 5002)
+After=network.target appsflyer-backend.service
+Wants=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+
+WorkingDirectory=/opt/appsflyer/backend
+ExecStart=/opt/appsflyer/backend/ai_chat_service
+Environment=AI_CHAT_PORT=:5002
+
+# 与主后端共用同一份环境变量文件（JWT_SECRET_KEY 等）
+EnvironmentFile=-/etc/appsflyer/backend.env
+
+Restart=on-failure
+RestartSec=5
+# 使用 journal 便于排查启动失败；查看日志: journalctl -u appsflyer-ai-chat -f
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=appsflyer-ai-chat
+
+[Install]
+WantedBy=multi-user.target

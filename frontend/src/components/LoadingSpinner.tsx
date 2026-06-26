@@ -16,4 +16,4 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ text = '加载中...' }
   );
 };
 
-export default LoadingSpinner; 
+export default LoadingSpinner;

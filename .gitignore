@@ -1,20 +1,52 @@
-# 数据库配置文件（包含敏感信息）
-backend/config/database.py
+# --- Secrets & local env (never commit) ---
+.env
+.env.*
+!.env.example
+backend/.env
+frontend/.env
+frontend/.env.*
+frontend/Scraper-backend/.env
 
-# Python缓存文件
-backend/__pycache__/
-*.pyc
+# --- Python ---
+__pycache__/
+*.py[cod]
 *.pyo
 *.pyd
-__pycache__/
-*.so
+.Python
+venv/
+.venv/
+*.egg-info/
+.pytest_cache/
 
-# 系统文件
+# --- Go build artifacts ---
+backend/autopipe_runner
+backend/ai_chat_service
+backend/bin/
+# Vendor is optional offline mirror (~200MB); use `go mod download` on deploy
+backend/vendor/
+
+# --- Node ---
+node_modules/
+frontend/node_modules/
+frontend/Scraper-backend/node_modules/
+frontend/build/
+frontend/.cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- OS / IDE ---
 .DS_Store
 Thumbs.db
-
-# IDE文件
 .vscode/
 .idea/
 *.swp
 *.swo
+
+# --- Temp & logs ---
+backend/temp/
+*.log
+/tmp/
+
+# --- TypeScript ---
+*.tsbuildinfo

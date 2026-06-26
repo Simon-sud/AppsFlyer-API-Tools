@@ -44,19 +44,14 @@
   -ms-user-select: none;
 }
 
-.no-select label,
-.no-select .ant-form-item-label,
-.no-select .ant-form-item-label > label,
-.no-select .ant-form-item-label label,
-.no-select .ant-form-item-label > label > span,
-.no-select .ant-form-item-label > span {
+.no-select label {
   user-select: none !important;
   -webkit-user-select: none !important;
   -moz-user-select: none !important;
   -ms-user-select: none !important;
 }
 
-/* RangePicker 日历内容不可选中 */
+/* RangePicker calendar content not selectable */
 .custom-range-picker .ant-picker-panel-container,
 .custom-range-picker .ant-picker-panel,
 .custom-range-picker .ant-picker-date-panel,
@@ -81,13 +76,13 @@
   -ms-user-select: none !important;
 }
 
-/* 防止日期选择器文本被选中 */
+/* Prevent date picker text selection */
 .custom-range-picker,
 .custom-range-picker * {
   user-select: none !important;
 }
 
-/* 选择器下拉动画 */
+/* Selector dropdown animation */
 .dropdown-enter {
   transform: translateY(-10px) scale(0.95);
   opacity: 0;
@@ -110,7 +105,7 @@
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* AppsFlyer官方日历选择器样式 */
+/* AppsFlyer official calendar picker styles */
 .ant-picker-dropdown {
   margin-top: -1px !important;
 }
@@ -145,18 +140,18 @@
   border-radius: 0 0 4px 4px !important;
 }
 
-/* 隐藏日历箭头指示器 */
+/* Hide calendar arrow indicator */
 .ant-picker-dropdown .ant-picker-panel-container::before,
 .ant-picker-dropdown .ant-picker-panel-container::after {
   display: none !important;
 }
 
-/* 确保日历面板没有顶部边框 */
+/* Remove top border from calendar panel */
 .ant-picker-dropdown .ant-picker-panel {
   border-top: none !important;
 }
 
-/* 自定义日历选择器容器样式 */
+/* Custom date selector dropdown container */
 [data-date-selector-dropdown] {
   -webkit-font-smoothing: antialiased !important;
   text-size-adjust: 100% !important;
@@ -170,7 +165,7 @@
   box-sizing: inherit !important;
 }
 
-/* 左侧预设选项样式 */
+/* Left preset option styles */
 [data-date-selector-dropdown] .quick-select-option {
   -webkit-font-smoothing: antialiased !important;
   text-size-adjust: 100% !important;

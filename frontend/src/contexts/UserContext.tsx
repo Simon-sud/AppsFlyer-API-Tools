@@ -1,7 +1,14 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { message } from 'antd';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+// Removed unused import: message
 import { useAuth } from './AuthContext';
 import { axiosInstance } from '../services/api';
+
+interface PrimaryTeam {
+  id: string;
+  name: string;
+  teamType: string;
+  logo?: string;
+}
 
 interface UserProfile {
   username: string;
@@ -9,6 +16,8 @@ interface UserProfile {
   role: string;
   lastLogin: string;
   avatar?: string;
+  twoFactorEnabled?: boolean;
+  primary_team?: PrimaryTeam | null;
 }
 
 interface UserContextType {
@@ -27,11 +36,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [error, setError] = useState<string | null>(null);
   const { currentUser } = useAuth();
 
-  // 缓存时间（5分钟）
-  const CACHE_DURATION = 5 * 60 * 1000;
-  const [lastUpdateTime, setLastUpdateTime] = useState(0);
+  // Cache TTL 1 min for timely last_login
+  const CACHE_DURATION = 1 * 60 * 1000;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_lastUpdateTime, setLastUpdateTime] = useState(0);
 
-  // 新增：每个账号独立缓存
+  // Per-account cache
   const userKey = currentUser?.id || '';
   const CACHE_KEY = `userProfile_${userKey}`;
   const CACHE_TIME_KEY = `userProfileTime_${userKey}`;
@@ -43,7 +53,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      // 检查缓存是否有效
+      // Skip duplicate fetch while loading
+      if (loading && !forceRefresh) {
+        console.log('UserContext: 正在加载中，跳过重复请求');
+        return;
+      }
+
+      // Check cache validity
       const now = Date.now();
       const cached = localStorage.getItem(CACHE_KEY);
       const cachedTime = Number(localStorage.getItem(CACHE_TIME_KEY) || 0);
@@ -68,26 +84,22 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role: string;
         last_login?: string;
         avatar?: string;
+        two_factor_enabled?: boolean;
+        primary_team?: { id: string; name: string; teamType: string; logo?: string } | null;
       };
+
       const profile: UserProfile = {
         username: data.username || data.email.split('@')[0],
         email: data.email,
         role: data.role,
-        lastLogin: data.last_login || new Date().toLocaleString('zh-CN', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: false
-        }).replace(/\//g, '-'),
-        avatar: data.avatar
+        lastLogin: data.last_login || 'Never',
+        avatar: data.avatar,
+        twoFactorEnabled: data.two_factor_enabled || false,
+        primary_team: data.primary_team ?? null
       };
-
       setUserProfile(profile);
       setLastUpdateTime(now);
-      // 写入本地缓存
+      // Write local cache
       localStorage.setItem(CACHE_KEY, JSON.stringify(profile));
       localStorage.setItem(CACHE_TIME_KEY, String(now));
     } catch (e: any) {
@@ -95,35 +107,51 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  }, [userKey]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userKey]); // Constants omitted; loading used internally
 
-  // 切换账号时清理旧缓存并强制拉取
+  // Ref: avoid duplicate init fetch
+  const initializedRef = useRef(false);
+  const lastUserKeyRef = useRef<string>('');
+
+  // On account switch: clear cache and refetch
   useEffect(() => {
-    setUserProfile(null);
-    setLastUpdateTime(0);
-    if (userKey) {
-      // 清理所有userProfile缓存（可选：只清理当前userKey）
+    // Skip if userKey unchanged and initialized
+    if (userKey === lastUserKeyRef.current && initializedRef.current) {
+      return;
+    }
+
+    // Update ref
+    lastUserKeyRef.current = userKey;
+    
+    if (userKey && currentUser) {
+      // Clear all userProfile caches
       Object.keys(localStorage).forEach(key => {
         if (key.startsWith('userProfile_')) localStorage.removeItem(key);
         if (key.startsWith('userProfileTime_')) localStorage.removeItem(key);
       });
+      
+      // Reset init flag
+      initializedRef.current = false;
+      
+      // Force refresh
       fetchUserProfile(true);
+      initializedRef.current = true; // Mark initialized
+    } else if (!userKey) {
+      // Logout: reset state
+      setUserProfile(null);
+      setLastUpdateTime(0);
+      initializedRef.current = false;
     }
-  }, [userKey, fetchUserProfile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userKey, currentUser]); // fetchUserProfile omitted; ref dedupes
 
-  // 更新用户信息
+  // Update user profile
   const updateUserProfile = useCallback((profile: Partial<UserProfile>) => {
     setUserProfile(prev => prev ? { ...prev, ...profile } : null);
   }, []);
 
-  // 初始加载
-  useEffect(() => {
-    if (currentUser) {
-      fetchUserProfile();
-    }
-  }, [currentUser, fetchUserProfile]);
-
-  // 定期刷新（每30分钟，固定）
+  // Periodic refresh every 30 minutes
   useEffect(() => {
     if (!currentUser) return;
     let timer: NodeJS.Timeout | null = null;
@@ -131,11 +159,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (timer) clearInterval(timer);
       timer = setInterval(() => {
         fetchUserProfile(true);
-      }, 30 * 60 * 1000); // 固定30分钟
+      }, 30 * 60 * 1000); // Fixed 30 minutes
     }
     setupInterval();
     return () => { if (timer) clearInterval(timer); };
-  }, [currentUser, userKey, fetchUserProfile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser, userKey]); // fetchUserProfile omitted to avoid loop
 
   return (
     <UserContext.Provider value={{

@@ -1,133 +1,147 @@
-# AppsFlyer RAWDATA WEB2 前端项目
+# AppsFlyer RAWDATA Workbench
 
-## 📋 项目简介
+一体化数据工作台：账户配置、原始数据查询、Dashboard、AutoPipe 调度、Dispatch 令牌、行业 Benchmark、App 下载估算（App Estimator）、应用发现（Apps Finder）及内置 AI 助手 Gochat。
 
-这是一个基于React和Ant Design的前端管理系统，用于管理AppsFlyer账户配置和报表数据。
+部署不依赖 Git，将项目目录拷贝/rsync 到服务器即可。
 
-## 🏗️ 项目结构
+---
 
+## 功能模块
+
+| 路由 | 模块 | 后端 |
+|------|------|------|
+| `/` | Appsflyer Query | Flask `:5000` |
+| `/dashboard` | Dashboard | Go `:5001` |
+| `/autopipe` | AutoPipe | Go `:5001` |
+| `/dispatch-access` | Dispatch Access | Flask + Go |
+| `/benchmark` | Benchmark Explorer | Go `:5001` |
+| `/app-estimator` | App Estimator | Go `:5001`（OpenClaw SQLite） |
+| `/apps` | Apps Finder | Scraper `:3001`（可选） |
+| `/account` | Account | Flask `:5000` |
+| `/docs` | 产品文档 | 静态页 |
+| 顶栏抽屉 | Gochat | Go `:5002` |
+
+Gochat 为全局侧栏助手（无独立路由），启用时需 PostgreSQL 存储会话。
+
+---
+
+## 技术栈
+
+| 层级 | 技术 |
+|------|------|
+| 前端 | React 19、TypeScript、CRA、Tailwind、D3、Recharts |
+| 主 API | Python Flask — **5000** |
+| 任务 / 分析 API | Go `autopipe_runner`（tag: `autopipe`）— **5001** |
+| AI 对话 | Go `ai_chat_service`（tag: `!autopipe`）— **5002** |
+| 商店抓取 | Node Scraper-backend — **3001**（可选） |
+| 主库 | MySQL 8+ |
+| 对话库 | PostgreSQL 15+（Gochat） |
+| 入口 | Nginx → `frontend/build` + 反向代理 |
+
+---
+
+## 端口
+
+| 端口 | 服务 |
+|------|------|
+| `80` / `443` | Nginx |
+| `3000` | 前端开发服（仅本地） |
+| `3001` | Scraper |
+| `5000` | Flask |
+| `5001` | AutoPipe Runner（Dashboard / AutoPipe / Benchmark / App Estimator） |
+| `5002` | Gochat |
+
+---
+
+## 目录结构
+
+```text
+├── frontend/
+│   ├── src/pages/
+│   ├── src/lib/appEstimator/
+│   ├── build/              # npm run build 产出
+│   └── Scraper-backend/
+├── backend/
+│   ├── app.py / auth.py
+│   ├── autopipe_runner.go
+│   ├── app_estimator*.go
+│   ├── ai_chat_service.go
+│   ├── scripts/            # Estimator 流水线脚本
+│   ├── database/
+│   ├── systemd/
+│   ├── start_services_optimized.sh
+│   └── restart_backend.sh
+├── nginx_server.conf
+├── scripts/update_nginx.sh
+├── start.sh
+├── DEPLOY.md
+├── ENVIRONMENT.md
+└── README.md
 ```
 
-AppsFlyer_RAWDATA_WEB2_Update/
-├── frontend/                    # 前端代码
-│   ├── src/                    # React源代码
-│   ├── public/                 # 静态资源
-│   ├── package.json            # 前端依赖配置
-│   ├── package-lock.json       # 依赖版本锁定
-│   ├── tsconfig.json           # TypeScript配置
-│   ├── .gitignore              # 前端Git忽略规则
-│   └── node_modules/           # 前端依赖包
-├── backend/                     # 后端代码
-│   ├── app.py                  # 主应用文件
-│   ├── auth.py                 # 认证模块
-│   ├── Config.py               # 配置模块
-│   ├── requirements.txt        # Python依赖
-│   ├── init_db.sql             # 数据库初始化
-│   ├── database/               # 数据库模块
-│   │   ├── __init__.py
-│   │   ├── db.py
-│   │   └── schema.sql
-│   └── config/                 # 配置模块
-│       └── database.py
-├── nginx_server.conf            # Nginx配置
-├── webhook_update.sh            # 自动部署脚本
-├── .gitignore                  # 项目Git忽略规则
-├── .gitlab-ci.yml              # GitLab CI/CD配置
-└── README.md                    # 项目说明
+---
 
+## 本地开发
 
-frontend/
-├── src/
-│   ├── components/     # 公共组件
-│   ├── pages/         # 页面组件
-│   ├── contexts/      # React Context
-│   ├── utils/         # 工具函数
-│   └── App.tsx        # 主应用组件
-├── public/            # 静态资源
-├── package.json       # 依赖配置
-└── vite.config.ts     # Vite配置
-```
+**依赖**：Node 18+、Python 3.9+、Go 1.21+、MySQL 8+；（Gochat）PostgreSQL 15+
 
-## 🚀 快速开始
-
-### 环境要求
-- Node.js >= 16.0.0
-- npm >= 8.0.0
-
-### 安装依赖
 ```bash
-cd frontend
-npm install
+# 安装依赖
+cd frontend && npm install
+cd ../backend && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt
+go mod download
+
+# 一键启动（检查 DB、拉起后端 + 前端）
+cd .. && bash start.sh
 ```
 
-### 开发环境运行
+**分服务启动**：
+
 ```bash
-npm run dev
+cd frontend && npm start
+cd backend && source venv/bin/activate && python app.py
+go build -tags autopipe -o autopipe_runner . && AUTOPIPE_PORT=:5001 ./autopipe_runner
+go build -tags '!autopipe' -o ai_chat_service . && AI_CHAT_PORT=:5002 ./ai_chat_service
 ```
 
-### 构建生产版本
+**健康检查**：
+
 ```bash
-npm run build
+curl -s http://127.0.0.1:5000/health
+curl -s http://127.0.0.1:5001/health
+curl -s http://127.0.0.1:5001/api/app-estimator/health
+curl -s http://127.0.0.1:5002/api/health
 ```
 
-## 🔧 技术栈
+---
 
-- **前端框架**: React 18
-- **构建工具**: Vite
-- **UI组件库**: Ant Design
-- **状态管理**: React Context + Hooks
-- **路由**: React Router
-- **HTTP客户端**: Axios
-- **样式**: CSS-in-JS + 自定义CSS
+## 环境变量（摘要）
 
-## 📦 部署
+生产环境统一使用 **`/etc/appsflyer/backend.env`**（见 `backend/systemd/README.md`）。
 
-### GitLab CI/CD 自动部署
+| 变量 | 用途 |
+|------|------|
+| `JWT_SECRET_KEY` | Flask / Go5001 / Go5002 共用 |
+| `DB_*` | MySQL |
+| `PG_*` | PostgreSQL（Gochat） |
+| `MIIMO_*` | Gochat 上游（可选） |
+| `APP_ESTIMATOR_*` | Estimator SQLite 路径与内置流水线 |
+| `CORS_ORIGIN` / `CORS_ORIGINS` | 生产跨域来源 |
+| `REDIS_ADDR` | Benchmark 缓存（可选） |
 
-项目已配置GitLab CI/CD，支持自动化构建和部署：
+配置模板见 **[ENVIRONMENT.md](./ENVIRONMENT.md)**（本地 vs 服务器完整说明）及 `backend/.env.example`。
 
-1. **推送代码到GitLab**
-2. **自动触发构建流程**
-3. **手动触发部署**（生产环境需要手动确认）
+---
 
-### 部署环境
+## 生产部署
 
-- **测试环境**: develop分支自动部署
-- **生产环境**: main分支手动部署
+完整步骤见 **[DEPLOY.md](./DEPLOY.md)**。
 
-## 🔐 环境变量
+```bash
+sudo bash backend/init_db_server.sh --env-file /etc/appsflyer/backend.env --with-pg
+cd frontend && npm ci && npm run build
+cd backend && sudo bash restart_backend.sh
+sudo bash scripts/update_nginx.sh
+```
 
-在GitLab项目设置中配置以下环境变量：
-
-### 生产环境
-- `SSH_PRIVATE_KEY`: SSH私钥
-- `DEPLOY_USER`: 部署用户名
-- `DEPLOY_HOST`: 部署服务器地址
-- `DEPLOY_PATH`: 部署路径
-- `DEPLOY_URL`: 部署后的访问地址
-
-### 测试环境
-- `SSH_PRIVATE_KEY_STAGING`: 测试环境SSH私钥
-- `DEPLOY_USER_STAGING`: 测试环境部署用户名
-- `DEPLOY_HOST_STAGING`: 测试环境服务器地址
-- `DEPLOY_PATH_STAGING`: 测试环境部署路径
-- `DEPLOY_URL_STAGING`: 测试环境访问地址
-
-## 📝 开发规范
-
-- 使用TypeScript进行类型检查
-- 遵循ESLint代码规范
-- 组件使用函数式组件 + Hooks
-- 样式优先使用Ant Design组件，必要时自定义CSS
-
-## 🤝 贡献指南
-
-1. Fork项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 创建Pull Request
-
-## 📄 许可证
-
-本项目采用MIT许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
+产品说明见应用内 **`/docs`**。

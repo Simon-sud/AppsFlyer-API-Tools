@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { axiosInstance } from '../services/api';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
+import { axiosInstance, clearTeamScopeStorage } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 interface User {
@@ -48,7 +48,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children, language =
     const loginTime = localStorage.getItem('loginTime') || sessionStorage.getItem('loginTime');
     if (!token || !loginTime) return false;
     
-    // 检查 token 是否过期（12小时）
+    // Check token expiry (12h)
     const loginTimestamp = parseInt(loginTime, 10);
     const now = Date.now();
     return now - loginTimestamp <= 12 * 60 * 60 * 1000;
@@ -56,8 +56,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children, language =
   const [isLoading, setIsLoading] = useState(true);
   const [isVerifying, setIsVerifying] = useState(true);
 
-  // 初始化时设置 axios 默认请求头
+  // Set axios default headers on init
   useEffect(() => {
+    // Skip Authorization on login page
+    if (window.location.pathname === '/login') {
+      setIsLoading(false);
+      setIsVerifying(false);
+      return;
+    }
+
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (token) {
       axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -66,51 +73,115 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children, language =
     setIsVerifying(false);
   }, []);
 
+  // Ref: avoid duplicate verify
+  const isVerifyingRef = useRef(false);
+  const lastVerifyTimeRef = useRef<number>(0);
+  const VERIFY_COOLDOWN = 5000; // 5s cooldown between verifies
+
   useEffect(() => {
     const verifyToken = async () => {
+      // Skip if verify in flight
+      if (isVerifyingRef.current) {
+        return;
+      }
+
+      // Skip if within cooldown
+      const now = Date.now();
+      if (now - lastVerifyTimeRef.current < VERIFY_COOLDOWN) {
+        return;
+      }
+
       try {
+        // Skip verify on login page
+        if (window.location.pathname === '/login') {
+          setIsLoading(false);
+          setIsVerifying(false);
+          return;
+        }
+
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         const userProfile = localStorage.getItem('userProfile') || sessionStorage.getItem('userProfile');
         const loginTime = localStorage.getItem('loginTime') || sessionStorage.getItem('loginTime');
         
         if (!token || !userProfile || !loginTime) {
-          console.log('缺少token或用户信息，执行登出操作');
+          // Missing token logs in dev
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Missing token or user info, executing logout');
+          }
           logout();
           return;
         }
 
-            const loginTimestamp = parseInt(loginTime, 10);
-            const now = Date.now();
+        const loginTimestamp = parseInt(loginTime, 10);
             
-        // 检查 token 是否过期（12小时）
+        // Check token expiry (12h)
         if (now - loginTimestamp > 12 * 60 * 60 * 1000) {
-          console.log('Token已过期，执行登出操作');
+          // Expired token logs in dev
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Token expired, executing logout');
+          }
           logout();
           return;
         }
 
-        // 设置 axios 默认请求头
+        // Set verify flags and timestamp
+        isVerifyingRef.current = true;
+        lastVerifyTimeRef.current = now;
+
+        // Set axios default headers
         axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
         try {
           const response = await axiosInstance.get('/api/auth/verify');
           if (response.status === 200) {
             const user = JSON.parse(userProfile);
+            
+            // Ensure user.id; parse from JWT if missing
+            if (!user.id && token) {
+              try {
+                // Parse JWT payload for user id (no verify)
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const payload = JSON.parse(window.atob(base64));
+                
+                if (payload.id) {
+                  user.id = payload.id;
+                  user.role = payload.role || user.role || 'Authenticated User';
+                  // Update stored user
+                  localStorage.setItem('userProfile', JSON.stringify(user));
+                  if (sessionStorage.getItem('userProfile')) {
+                    sessionStorage.setItem('userProfile', JSON.stringify(user));
+                  }
+                }
+              } catch (e) {
+                // Silent fail
+              }
+            }
+            
             setCurrentUser(user);
             setIsAuthenticated(true);
-            console.log('Token验证成功，用户已登录');
+            // Verify success logs in dev
+            if (process.env.NODE_ENV === 'development') {
+              console.log('Token verification successful, user logged in');
+            }
           }
         } catch (error: any) {
           console.error('Token验证失败:', error);
-          // 只有在明确收到401错误时才登出
+          // Logout only on explicit 401
           if (error.response?.status === 401) {
-            console.log('Token无效，执行登出操作');
+            // Invalid token logs in dev
+            if (process.env.NODE_ENV === 'development') {
+              console.log('Token无效，执行登出操作');
+            }
             logout();
           }
+        } finally {
+          isVerifyingRef.current = false;
         }
       } catch (error) {
         console.error('Token验证过程出错:', error);
-        // 保持当前状态
+        isVerifyingRef.current = false;
+        // Keep current state
         const userProfile = localStorage.getItem('userProfile') || sessionStorage.getItem('userProfile');
         if (userProfile) {
           const user = JSON.parse(userProfile);
@@ -120,15 +191,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children, language =
       }
     };
 
-    // 立即执行一次验证
+    // Verify once immediately
     verifyToken();
 
-    // 设置定时验证（每30分钟验证一次）
+    // Re-verify every 30 minutes
     const intervalId = setInterval(verifyToken, 30 * 60 * 1000);
 
-    // 清理函数
+    // Cleanup
     return () => {
       clearInterval(intervalId);
+      isVerifyingRef.current = false;
     };
   }, []);
 
@@ -150,9 +222,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children, language =
     sessionStorage.removeItem('userProfile');
     sessionStorage.removeItem('isLoggedIn');
     sessionStorage.removeItem('loginTime');
-    // 清除语言设置，确保下次登录时重置为默认英文
+    // Clear language so next login defaults to English
     sessionStorage.removeItem('language');
     delete axiosInstance.defaults.headers.common['Authorization'];
+    clearTeamScopeStorage();
   };
 
   const value = {
@@ -167,7 +240,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children, language =
   };
 
   if (isLoading || isVerifying) {
-    return <LoadingSpinner text={language === 'zh' ? '正在验证登录状态' : 'Verifying Login Status'} />;
+    return <LoadingSpinner text="Verifying Login Status" />;
   }
 
   return (

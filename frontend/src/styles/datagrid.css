@@ -1,0 +1,719 @@
+/* AppsFlyer DataGrid — complex styles not expressible in Tailwind */
+/* Zoom-friendly: natural browser scaling, no forced zoom: 1 */
+
+/* Table container base (CSS variables for compatibility) */
+.appsflyer-datagrid {
+  --DataGrid-containerBackground: #FFFFFF;
+  --DataGrid-pinnedBackground: #FFFFFF;
+  --DataGrid-rowBorderColor: #E6E9F0;
+  --DataGrid-headerHeight: 56px;
+  --height: 52px;
+  /* allow natural browser zoom */
+  box-sizing: border-box;
+  /* normal text-size adjustment */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Table borders — complex logic kept in CSS */
+.appsflyer-datagrid-table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  /* allow natural browser zoom */
+  box-sizing: border-box;
+  /* normal text-size adjustment */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+.appsflyer-datagrid-table * {
+  box-sizing: border-box;
+  /* allow natural browser zoom */
+  /* normal text-size adjustment */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+.appsflyer-datagrid-table th,
+.appsflyer-datagrid-table td {
+  border: 1px solid var(--DataGrid-rowBorderColor) !important;
+  /* allow natural browser zoom */
+  box-sizing: border-box;
+  /* normal text-size adjustment */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* consistent font rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.appsflyer-datagrid-table thead th {
+  border-top: none !important;
+}
+
+.appsflyer-datagrid-table th:first-child,
+.appsflyer-datagrid-table td:first-child {
+  border-left: none !important;
+}
+
+.appsflyer-datagrid-table th:last-child,
+.appsflyer-datagrid-table td:last-child {
+  border-right: none !important;
+}
+
+.appsflyer-datagrid-table tbody tr:last-child td {
+  border-bottom: 1px solid var(--DataGrid-rowBorderColor) !important;
+}
+
+/* Header content — simplified via @apply */
+.appsflyer-datagrid-header-content {
+  @apply w-full h-full flex items-center justify-center;
+  @apply font-semibold text-center cursor-default select-none;
+  @apply pointer-events-none;
+  font-family: inherit;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* Status tags — simplified via @apply */
+.appsflyer-status-tag {
+  @apply px-3 py-1 rounded text-xs font-semibold text-white min-w-[60px];
+  @apply text-center inline-flex items-center justify-center;
+  @apply uppercase tracking-wide cursor-default select-none;
+  font-family: inherit;
+}
+
+.appsflyer-status-success {
+  @apply bg-[#52c41a];
+}
+
+.appsflyer-status-error {
+  @apply bg-[#ff4d4f];
+}
+
+.appsflyer-status-processing {
+  @apply bg-[#1677ff];
+}
+
+.appsflyer-status-default {
+  @apply bg-[#d9d9d9] text-[#595959];
+}
+
+/* Actions container — @apply, top z-index, fills cell */
+.appsflyer-actions-container {
+  @apply flex gap-1.5 items-center justify-center;
+  position: relative !important;
+  z-index: 1200 !important;
+  pointer-events: auto !important;
+  isolation: isolate;
+  width: 100%;
+  height: 52px;
+  /* Container receives hover — no dead zones */
+  background: transparent;
+}
+
+.appsflyer-actions-container * {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1201 !important;
+}
+
+/* Button base — larger hit area, seamless */
+.appsflyer-actions-container button {
+  @apply cursor-pointer;
+  /* No will-change (Chrome jitter); use GPU acceleration */
+  /* will-change: background-color; */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transition: background-color 0.15s ease-out;
+  pointer-events: auto !important;
+  position: relative;
+  /* Keep button label centered */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Expand hit area — remove dead zones */
+.appsflyer-actions-container button::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  pointer-events: auto !important;
+  z-index: -1;
+}
+
+.appsflyer-actions-container button:hover:not(:disabled) {
+  @apply bg-[#f0f0f0];
+  /* translateZ(0) for GPU; position stays stable */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+.appsflyer-actions-container button:active:not(:disabled) {
+  @apply bg-[#e8e8e8];
+  /* translateZ(0) for GPU; position stays stable */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+.appsflyer-actions-container button:disabled {
+  @apply cursor-not-allowed opacity-50;
+}
+
+/* Log/Actions columns — raised z-index for interaction */
+.appsflyer-datagrid-row td.log-cell,
+.appsflyer-datagrid-row td.actions-cell {
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 1100 !important;
+  isolation: isolate;
+}
+
+.appsflyer-datagrid-table td.log-cell {
+  background: var(--DataGrid-containerBackground) !important;
+}
+
+.appsflyer-datagrid-table td.log-cell * {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1001 !important;
+}
+
+.appsflyer-datagrid-table td.actions-cell {
+  background: var(--DataGrid-containerBackground) !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.appsflyer-datagrid-table td.actions-cell * {
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 1201 !important;
+}
+
+/* Actions column descendants receive pointer events */
+.appsflyer-datagrid-table tbody tr td.actions-cell,
+.appsflyer-datagrid-table tbody tr td.actions-cell > *,
+.appsflyer-datagrid-table tbody tr td.actions-cell > * > * {
+  pointer-events: auto !important;
+}
+
+/* Highlight row animation */
+.appsflyer-highlight-success {
+  background-color: #f6ffed !important;
+  border-left: 4px solid #52c41a;
+  animation: highlight-success 2s ease-in-out;
+  box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
+}
+
+.appsflyer-highlight-success td,
+.appsflyer-highlight-success th {
+  transform: none !important;
+  will-change: auto !important;
+  backface-visibility: visible !important;
+  transition: none !important;
+}
+
+.appsflyer-highlight-processing {
+  background-color: #e6f7ff !important;
+  border-left: 4px solid #1677ff;
+  animation: highlight-processing 2s ease-in-out;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.2);
+}
+
+.appsflyer-highlight-processing td,
+.appsflyer-highlight-processing th {
+  transform: none !important;
+  will-change: auto !important;
+  backface-visibility: visible !important;
+  transition: none !important;
+}
+
+.appsflyer-highlight-failed {
+  background-color: #fff2e8 !important;
+  border-left: 4px solid #fa8c16;
+  animation: highlight-failed 2s ease-in-out;
+  box-shadow: 0 0 0 2px rgba(250, 140, 22, 0.2);
+}
+
+.appsflyer-highlight-failed td,
+.appsflyer-highlight-failed th {
+  transform: none !important;
+  will-change: auto !important;
+  backface-visibility: visible !important;
+  transition: none !important;
+}
+
+.appsflyer-highlight-error {
+  background-color: #fff1f0 !important;
+  border-left: 4px solid #ff4d4f;
+  animation: highlight-error 2s ease-in-out;
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2);
+}
+
+.appsflyer-highlight-error td,
+.appsflyer-highlight-error th {
+  transform: none !important;
+  will-change: auto !important;
+  backface-visibility: visible !important;
+  transition: none !important;
+}
+
+/* Scrollbar — dark gray theme */
+.appsflyer-datagrid-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.appsflyer-datagrid-container::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.appsflyer-datagrid-container::-webkit-scrollbar-thumb {
+  background: rgb(55, 65, 81); /* gray-700 */
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 0.2s ease;
+}
+
+.appsflyer-datagrid-container::-webkit-scrollbar-thumb:hover {
+  background: rgb(31, 41, 55); /* gray-800 */
+  background-clip: padding-box;
+}
+
+.appsflyer-datagrid-container::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.appsflyer-datagrid-container::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* Text selection rules */
+.appsflyer-datagrid-table td .appsflyer-status-tag,
+.appsflyer-datagrid-table td .appsflyer-actions-container,
+.appsflyer-datagrid-table td .appsflyer-actions-container *,
+.appsflyer-datagrid-table td button {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+
+/* Log column LogLink — no selection, click-only; Tailwind colors */
+/* Color via Tailwind: text-blue-600 dark:text-blue-400 */
+.appsflyer-log-link,
+.appsflyer-datagrid-table td.log-cell span[role="button"] {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 1001 !important;
+  isolation: isolate !important;
+  /* Remove properties that cause flicker */
+  transition: none !important;
+  animation: none !important;
+  transform: none !important;
+  will-change: auto !important;
+  backface-visibility: visible !important;
+  /* No hard-coded color — Tailwind classes */
+  text-decoration: none !important;
+  background-color: transparent !important;
+}
+
+/* LogLink hover — Tailwind: hover:text-blue-700 dark:hover:text-blue-300 */
+.appsflyer-log-link:hover,
+.appsflyer-datagrid-table td.log-cell span[role="button"]:hover {
+  text-decoration: underline !important;
+  background-color: transparent !important;
+  /* No transition on hover */
+  transition: none !important;
+  animation: none !important;
+  transform: none !important;
+}
+
+/* LogLink active — Tailwind: active:text-blue-800 dark:active:text-blue-500 */
+.appsflyer-log-link:active,
+.appsflyer-datagrid-table td.log-cell span[role="button"]:active {
+  text-decoration: underline !important;
+  transition: none !important;
+  animation: none !important;
+  transform: none !important;
+}
+
+/* Log cell and contents are interactive */
+.appsflyer-datagrid-table td.log-cell,
+.appsflyer-datagrid-table td.log-cell * {
+  pointer-events: auto !important;
+}
+
+/* Log cell must not block clicks; remove flicker props */
+.appsflyer-datagrid-table td.log-cell {
+  -webkit-tap-highlight-color: transparent !important;
+  transition: none !important;
+  animation: none !important;
+  transform: none !important;
+  will-change: auto !important;
+  backface-visibility: visible !important;
+}
+
+/* Log cell descendants — no flicker props */
+.appsflyer-datagrid-table td.log-cell * {
+  transition: none !important;
+  animation: none !important;
+  transform: none !important;
+  will-change: auto !important;
+  backface-visibility: visible !important;
+}
+
+/* Table row styles */
+.appsflyer-datagrid-row {
+  min-height: var(--height);
+  border-bottom: 1px solid var(--DataGrid-rowBorderColor);
+  background: var(--DataGrid-containerBackground);
+  transition: none !important;
+  position: relative;
+  will-change: auto !important;
+  transform: none !important;
+}
+
+.appsflyer-datagrid-row:hover {
+  background: var(--DataGrid-containerBackground) !important;
+}
+
+.appsflyer-datagrid-row:last-child {
+  border-bottom: none;
+}
+
+/* Table cell styles */
+.appsflyer-datagrid-cell {
+  padding: 0 16px;
+  height: var(--height);
+  font-size: 14px;
+  font-weight: 400;
+  color: rgb(34, 13, 78);
+  border: 1px solid var(--DataGrid-rowBorderColor);
+  border-top: none;
+  border-left: none;
+  background: var(--DataGrid-containerBackground);
+  white-space: nowrap;
+  text-align: center;
+  vertical-align: middle;
+  overflow: visible;
+  text-overflow: unset;
+  font-family: inherit;
+  width: auto;
+  transition: none !important;
+  animation: none !important;
+  will-change: auto !important;
+  transform: none !important;
+  backface-visibility: visible !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  -webkit-touch-callout: default !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.appsflyer-datagrid-cell:first-child {
+  border-left: none;
+}
+
+.appsflyer-datagrid-cell:last-child {
+  border-right: none;
+}
+
+/* Header cell styles */
+.appsflyer-datagrid-header-cell {
+  padding: 0 16px;
+  height: var(--DataGrid-headerHeight);
+  font-weight: 600;
+  font-size: 14px;
+  color: rgb(34, 13, 78);
+  border: 1px solid var(--DataGrid-rowBorderColor);
+  border-top: none;
+  border-left: none;
+  background: var(--DataGrid-pinnedBackground);
+  white-space: nowrap;
+  text-align: center;
+  vertical-align: middle;
+  font-family: inherit;
+  width: auto;
+}
+
+.appsflyer-datagrid-header-cell:first-child {
+  border-left: none;
+}
+
+.appsflyer-datagrid-header-cell:last-child {
+  border-right: none;
+}
+
+/* Table container/body — inner table square corners */
+.appsflyer-datagrid-container {
+  background: var(--DataGrid-containerBackground);
+  border-radius: 0; /* inner table: square corners */
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
+  overflow-x: auto;
+  overflow-y: auto;
+  position: relative;
+  width: 100%;
+  height: auto;
+  max-height: 600px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.appsflyer-datagrid-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+  background: var(--DataGrid-containerBackground);
+  border-spacing: 0;
+  border: none;
+}
+
+.appsflyer-datagrid-header {
+  background: var(--DataGrid-pinnedBackground);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.appsflyer-datagrid-body {
+  background: var(--DataGrid-containerBackground);
+  position: relative;
+  overflow: visible;
+  max-height: none;
+}
+
+/* Remove all row animations and transforms */
+.appsflyer-fade-in-row {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+  will-change: auto !important;
+  backface-visibility: visible !important;
+}
+
+.appsflyer-fade-in-row td,
+.appsflyer-fade-in-row th {
+  animation: none !important;
+  transform: none !important;
+  transition: none !important;
+  will-change: auto !important;
+  backface-visibility: visible !important;
+}
+
+.appsflyer-datagrid-body {
+  opacity: 1;
+  transition: none !important;
+}
+
+/* Disable hover via pointer-events */
+.appsflyer-datagrid-table th {
+  pointer-events: none;
+  cursor: default;
+  user-select: none;
+}
+
+.appsflyer-datagrid-table td {
+  pointer-events: none;
+  cursor: default;
+  user-select: none;
+}
+
+/* Interaction only on Log and Actions columns */
+.appsflyer-datagrid-table td.log-cell,
+.appsflyer-datagrid-table td.actions-cell {
+  pointer-events: auto !important;
+}
+
+/* Empty state */
+.appsflyer-datagrid-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #8c8c8c;
+  font-size: 14px;
+  font-weight: 400;
+  background: var(--DataGrid-containerBackground);
+  font-family: inherit;
+}
+
+/* Loading state — skeleton */
+.appsflyer-datagrid-loading {
+  position: absolute;
+  top: calc(var(--DataGrid-headerHeight, 56px) + 1px);
+  left: 0;
+  right: 0;
+  bottom: -1px; /* extend to container bottom */
+  background: #ffffff;
+  z-index: 1100;
+  overflow: hidden; /* hidden — prevent overflow */
+  padding: 0;
+  /* min-height for all skeleton rows */
+  min-height: calc(9 * 52px); /* 9 rows × 52px = 468px (PAGE_SIZE) */
+}
+
+.skeleton-row-container {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+  /* 100% height fills container */
+  height: 100%;
+  min-height: calc(9 * 52px); /* 9 rows × 52px min height */
+}
+
+.skeleton-row {
+  display: table-row;
+  height: 52px; /* explicit row height matching table */
+}
+
+.skeleton-row:last-child {
+  /* last row fills to bottom */
+  height: 52px;
+}
+
+.skeleton-row:last-child .skeleton-cell {
+  border-bottom: none; /* last row: no bottom border */
+  /* last row cells fill to bottom */
+  height: 52px;
+  min-height: 52px;
+}
+
+.skeleton-cell {
+  display: table-cell;
+  padding: 16px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+  height: 52px; /* match table row height */
+  min-height: 52px; /* matching min-height */
+  box-sizing: border-box; /* padding included in height */
+}
+
+.skeleton-cell::before {
+  content: '';
+  display: block;
+  height: 16px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #f0f0f0 40%,
+    #e0e0e0 50%,
+    #f0f0f0 60%,
+    #f0f0f0 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+/* Match table column widths */
+.skeleton-cell-short::before {
+  width: 60%;
+}
+
+.skeleton-cell-medium::before {
+  width: 75%;
+}
+
+.skeleton-cell-long::before {
+  width: 85%;
+}
+
+.skeleton-cell-extra-long::before {
+  width: 90%;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Responsive — mobile optimization */
+@media (max-width: 1400px) {
+  .appsflyer-datagrid-table th,
+  .appsflyer-datagrid-table td {
+    padding: 0 12px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .appsflyer-datagrid-table th,
+  .appsflyer-datagrid-table td {
+    padding: 0 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .appsflyer-datagrid-container {
+    max-height: 400px;
+  }
+  
+  .appsflyer-datagrid-table th,
+  .appsflyer-datagrid-table td {
+    padding: 0 6px;
+    font-size: 11px;
+  }
+  
+  .appsflyer-actions-container {
+    gap: 4px;
+  }
+  
+  .appsflyer-status-tag {
+    padding: 2px 8px;
+    font-size: 10px;
+    min-width: 50px;
+  }
+}
+
+@media (max-width: 480px) {
+  .appsflyer-datagrid-container {
+    max-height: 300px;
+  }
+  
+  .appsflyer-datagrid-table th,
+  .appsflyer-datagrid-table td {
+    padding: 0 4px;
+    font-size: 10px;
+  }
+  
+  .appsflyer-actions-container {
+    gap: 2px;
+  }
+  
+  .appsflyer-status-tag {
+    padding: 1px 6px;
+    font-size: 9px;
+    min-width: 40px;
+  }
+}
+

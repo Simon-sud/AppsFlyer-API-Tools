@@ -338,6 +338,8 @@ sudo bash scripts/update_nginx.sh
 
 <p>产品说明见应用内 <code>/docs</code></p>
 
+<p><strong>许可：</strong>专有许可 — 仅展示与非商业使用。详见 <a href="./LICENSE">LICENSE</a>。</p>
+
 <br />
 
 <sub>AppsFlyer-API-Tools · React · Flask · Go</sub>

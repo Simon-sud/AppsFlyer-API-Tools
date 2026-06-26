@@ -338,6 +338,8 @@ sudo bash scripts/update_nginx.sh
 
 <p>In-app product documentation: <code>/docs</code></p>
 
+<p><strong>License:</strong> Proprietary — display &amp; non-commercial use only. See <a href="./LICENSE">LICENSE</a>.</p>
+
 <br />
 
 <sub>AppsFlyer-API-Tools · React · Flask · Go</sub>
